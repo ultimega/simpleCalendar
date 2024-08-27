@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calendar App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .form-container {
+            width: 300px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-container h2 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        
+        .form-actions button,
+        .form-actions input[type="file"] {
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px; /* Add space between buttons */
+            width: 100%; /* Ensure buttons take full width of the container */
+        }
+        
+        .form-actions button.clear-button {
+            background-color: #dc3545;
+        }
+        
+        .form-actions button.clear-button:hover {
+            background-color: #c82333;
+        }
+        
+        .form-actions button:hover {
+            background-color: #218838;
+        }
+        
+        .table-container {
+            flex: 1;
+            margin-left: 320px;
+            padding: 20px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+
+        th.asc::after {
+            content: " 🔼";
+        }
+
+        th.desc::after {
+            content: " 🔽";
+        }
+
+        .highlighted {
+            background-color: #e9ecef;
+        }
+
+        .select-button {
+            padding: 6px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .select-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Fixed Form on the Left -->
+    <div class="form-container">
+        <h2>Add Event</h2>
+        <form id="eventForm">
+            <input type="hidden" id="editIndex">
+            <label for="eventName">Event Name:</label>
+            <input type="text" id="eventName" required>
+
+            <label for="eventDate">Date:</label>
+            <input type="date" id="eventDate" required>
+
+            <label for="eventTime">Time:</label>
+            <input type="time" id="eventTime" required>
+
+            <div class="form-actions">
+                <button type="submit">Save Event</button>
+                <button type="button" id="deleteSelected">Delete Selected</button>
+                <button type="button" class="clear-button" id="clearAll">Clear All</button>
+                <button type="button" id="exportCSV">Export as CSV</button>
+                <label for="loadCSV">Load CSV:</label>
+                <input type="file" id="loadCSV" accept=".csv" />
+            </div>
+
+            <div class="filter-options">
+                <label for="filterSelect">Show:</label>
+                <select id="filterSelect">
+                    <option value="all">All Events</option>
+                    <option value="week">Events This Week</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Scrollable Table on the Right -->
+    <div class="table-container">
+        <h2>Stored Events</h2>
+        <table id="eventTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Event Name</th>
+                    <th onclick="sortTable(1)">Date</th>
+                    <th onclick="sortTable(2)">Time</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Events will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const form = document.getElementById('eventForm');
+            const table = document.getElementById('eventTable').getElementsByTagName('tbody')[0];
+            const eventNameField = document.getElementById('eventName');
+            const eventDateField = document.getElementById('eventDate');
+            const eventTimeField = document.getElementById('eventTime');
+            const editIndexField = document.getElementById('editIndex');
+            const filterSelect = document.getElementById('filterSelect');
+            let selectedEventIndex = null;
+    
+            //load csv
+            document.getElementById('loadCSV').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function (e) {
+                    const content = e.target.result;
+                    const lines = content.split('\n');
+                    
+                    // Clear existing events in local storage
+                    localStorage.removeItem('events');
+                    
+                    // Initialize an empty events array
+                    const events = [];
+                    
+                    // Skip the first line (headers) and parse the rest
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (line) {  // Make sure it's not an empty line
+                            const [name, date, time] = line.split(',');
+                            events.push({ name: name.trim(), date: date.trim(), time: time.trim() });
+                        }
+                    }
+                    
+                    // Store the events in local storage
+                    localStorage.setItem('events', JSON.stringify(events));
+                    
+                    // Reload the events into the table
+                    loadEvents(filterSelect.value);
+                    
+                    // Reset the file input field
+                    event.target.value = '';
+                };
+                
+                reader.readAsText(file);
+            });
+            
+            function loadEvents(filter = 'all') {
+                const events = JSON.parse(localStorage.getItem('events')) || [];
+                table.innerHTML = ''; // Clear existing rows
+    
+                const today = new Date();
+                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+    
+                events.forEach((event, index) => {
+                    const eventDate = new Date(event.date);
+                    if (filter === 'week' && (eventDate < startOfWeek || eventDate > endOfWeek)) {
+                        return;
+                    }
+    
+                    const newRow = table.insertRow();
+                    newRow.insertCell(0).textContent = event.name;
+                    newRow.insertCell(1).textContent = event.date;
+                    newRow.insertCell(2).textContent = event.time;
+    
+                    // Add Select Button
+                    const selectButton = document.createElement('button');
+                    selectButton.textContent = 'Select';
+                    selectButton.className = 'select-button';
+                    selectButton.onclick = () => {
+                        // Pre-fill the form with the selected event data
+                        eventNameField.value = event.name;
+                        eventDateField.value = event.date;
+                        eventTimeField.value = event.time;
+                        editIndexField.value = index;
+                        selectedEventIndex = index; // Store the index of the event being edited
+    
+                        // Highlight selected row
+                        Array.from(table.rows).forEach(row => row.classList.remove('highlighted'));
+                        newRow.classList.add('highlighted');
+                    };
+                    newRow.insertCell(3).appendChild(selectButton);
+                });
+            }
+    
+            loadEvents(); // Load events on page load
+    
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+    
+                const eventName = eventNameField.value;
+                const eventDate = eventDateField.value;
+                const eventTime = eventTimeField.value;
+                const editIndex = editIndexField.value;
+    
+                const events = JSON.parse(localStorage.getItem('events')) || [];
+    
+                if (editIndex === '') {
+                    events.push({ name: eventName, date: eventDate, time: eventTime });
+                } else {
+                    events[editIndex] = { name: eventName, date: eventDate, time: eventTime };
+                }
+    
+                localStorage.setItem('events', JSON.stringify(events));
+                loadEvents(filterSelect.value); // Reload events with the selected filter
+                form.reset();
+                editIndexField.value = '';
+                selectedEventIndex = null; // Reset selected event index
+            });
+    
+            document.getElementById('clearAll').addEventListener('click', function () {
+                localStorage.removeItem('events');
+                table.innerHTML = '';
+            });
+    
+            filterSelect.addEventListener('change', function () {
+                loadEvents(this.value);
+            });
+    
+            document.getElementById('exportCSV').addEventListener('click', function () {
+                const events = JSON.parse(localStorage.getItem('events')) || [];
+                let csvContent = "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
+    
+                events.forEach(event => {
+                    const row = `${event.name},${event.date},${event.time}`;
+                    csvContent += row + "\n";
+                });
+    
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement('a');
+                link.setAttribute('href', encodedUri);
+                link.setAttribute('download', 'events.csv');
+                document.body.appendChild(link); // Required for Firefox
+    
+                link.click();
+                document.body.removeChild(link);
+            });
+    
+            // Delete Selected Event Functionality
+            document.getElementById('deleteSelected').addEventListener('click', function () {
+                if (selectedEventIndex !== null) {
+                    const events = JSON.parse(localStorage.getItem('events')) || [];
+    
+                    // Remove the selected event
+                    events.splice(selectedEventIndex, 1);
+    
+                    localStorage.setItem('events', JSON.stringify(events));
+                    loadEvents(filterSelect.value); // Reload events
+    
+                    // Reset selected event index and form
+                    selectedEventIndex = null;
+                    form.reset();
+                } else {
+                    alert('Please select an event to delete.');
+                }
+            });
+    
+            // Sort Table Functionality
+            function sortTable(n) {
+                const table = document.getElementById('eventTable');
+                const rows = Array.from(table.getElementsByTagName('tbody')[0].rows);
+                const isAscending = table.getElementsByTagName('th')[n].classList.contains('asc');
+    
+                rows.sort((a, b) => {
+                    const aText = a.getElementsByTagName('td')[n].textContent;
+                    const bText = b.getElementsByTagName('td')[n].textContent;
+    
+                    if (isAscending) {
+                        return aText > bText ? 1 : -1;
+                    } else {
+                        return aText < bText ? 1 : -1;
+                    }
+                });
+    
+                table.getElementsByTagName('tbody')[0].append(...rows);
+    
+                // Toggle sort direction
+                table.getElementsByTagName('th')[n].classList.toggle('asc', !isAscending);
+                table.getElementsByTagName('th')[n].classList.toggle('desc', isAscending);
+            }
+        });
+    </script>    
+</body>
+
+</html>

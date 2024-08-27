@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Calendar App</title>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
     <style>
         * {
             box-sizing: border-box;
@@ -52,7 +56,7 @@
             color: #333;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
@@ -64,7 +68,7 @@
             transition: transform 0.2s;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             transform: scale(1.02);
         }
@@ -109,7 +113,7 @@
             border: 1px solid #343a40;
         }
 
-        .table-container {
+        .content-container {
             flex: 1;
             margin-left: 340px;
             padding: 20px;
@@ -117,6 +121,10 @@
             background: linear-gradient(135deg, #ffffff, #f2f4f7);
             border-radius: 15px;
             box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-container, .calendar-container {
+            display: none;
         }
 
         h2 {
@@ -132,8 +140,7 @@
             border-collapse: collapse;
         }
 
-        th,
-        td {
+        th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #dee2e6;
@@ -163,51 +170,18 @@
             background-color: #e9ecef;
         }
 
-        .checkbox-container {
-            display: flex;
-            align-items: center;
+        #calendar {
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        .checkbox-container input {
-            width: 20px;
-            height: 20px;
+        .fc-event {
             cursor: pointer;
-            transform: scale(1.2);
-        }
-
-        .filter-options {
-            margin-top: 20px;
-        }
-
-        .filter-options label {
-            font-size: 16px;
-            margin-right: 10px;
-        }
-
-        .filter-options select {
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        .radio-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .radio-container input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            transform: scale(1.2);
-            margin-right: 10px;
         }
     </style>
 </head>
 
 <body>
-    <!-- Fixed Form on the Left -->
     <div class="form-container">
         <h2>Add Event</h2>
         <form id="eventForm">
@@ -237,25 +211,36 @@
                     <option value="week">Events This Week</option>
                 </select>
             </div>
+
+            <div class="view-options">
+                <label for="viewSelect">View:</label>
+                <select id="viewSelect">
+                    <option value="list">List View</option>
+                    <option value="calendar">Calendar View</option>
+                </select>
+            </div>
         </form>
     </div>
 
-    <!-- Scrollable Table on the Right -->
-    <div class="table-container">
-        <h2>Stored Events</h2>
-        <table id="eventTable">
-            <thead>
-                <tr>
-                    <th onclick="sortTable(0)">Event Name</th>
-                    <th onclick="sortTable(1)">Date</th>
-                    <th onclick="sortTable(2)">Time</th>
-                    <th>Select</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Events will be dynamically inserted here -->
-            </tbody>
-        </table>
+    <div class="content-container">
+        <div class="table-container">
+            <h2>Stored Events</h2>
+            <table id="eventTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Event Name</th>
+                        <th onclick="sortTable(1)">Date</th>
+                        <th onclick="sortTable(2)">Time</th>
+                        <th>Select</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="calendar-container">
+            <div id="calendar"></div>
+        </div>
     </div>
 
     <script>
@@ -267,9 +252,99 @@
             const eventTimeField = document.getElementById('eventTime');
             const editIndexField = document.getElementById('editIndex');
             const filterSelect = document.getElementById('filterSelect');
+            const viewSelect = document.getElementById('viewSelect');
             let selectedEventIndex = null;
-    
-            //load csv
+
+            function loadEvents(filter = 'all') {
+                const events = JSON.parse(localStorage.getItem('events')) || [];
+                table.innerHTML = '';
+
+                const today = new Date();
+                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+
+                events.forEach((event, index) => {
+                    const eventDate = new Date(event.date);
+                    if (filter === 'week' && (eventDate < startOfWeek || eventDate > endOfWeek)) {
+                        return;
+                    }
+
+                    const newRow = table.insertRow();
+                    newRow.insertCell(0).textContent = event.name;
+                    newRow.insertCell(1).textContent = event.date;
+                    newRow.insertCell(2).textContent = event.time;
+
+                    const selectButton = document.createElement('button');
+                    selectButton.textContent = 'Select';
+                    selectButton.onclick = () => {
+                        eventNameField.value = event.name;
+                        eventDateField.value = event.date;
+                        eventTimeField.value = event.time;
+                        editIndexField.value = index;
+                        selectedEventIndex = index;
+
+                        Array.from(table.rows).forEach(row => row.classList.remove('highlighted'));
+                        newRow.classList.add('highlighted');
+                    };
+                    newRow.insertCell(3).appendChild(selectButton);
+                });
+
+                updateCalendar();
+            }
+
+            loadEvents();
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const eventName = eventNameField.value;
+                const eventDate = eventDateField.value;
+                const eventTime = eventTimeField.value;
+                const editIndex = editIndexField.value;
+
+                const events = JSON.parse(localStorage.getItem('events')) || [];
+
+                if (editIndex === '') {
+                    events.push({ name: eventName, date: eventDate, time: eventTime });
+                } else {
+                    events[editIndex] = { name: eventName, date: eventDate, time: eventTime };
+                }
+
+                localStorage.setItem('events', JSON.stringify(events));
+                loadEvents(filterSelect.value);
+                form.reset();
+                editIndexField.value = '';
+                selectedEventIndex = null;
+            });
+
+            document.getElementById('clearAll').addEventListener('click', function () {
+                localStorage.removeItem('events');
+                loadEvents(filterSelect.value);
+            });
+
+            filterSelect.addEventListener('change', function () {
+                loadEvents(this.value);
+            });
+
+            document.getElementById('exportCSV').addEventListener('click', function () {
+                const events = JSON.parse(localStorage.getItem('events')) || [];
+                let csvContent = "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
+
+                events.forEach(event => {
+                    const row = `${event.name},${event.date},${event.time}`;
+                    csvContent += row + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement('a');
+                link.setAttribute('href', encodedUri);
+                link.setAttribute('download', 'events.csv');
+                document.body.appendChild(link);
+
+                link.click();
+                document.body.removeChild(link);
+            });
+
             document.getElementById('loadCSV').addEventListener('change', function (event) {
                 const file = event.target.files[0];
                 const reader = new FileReader();
@@ -278,170 +353,137 @@
                     const content = e.target.result;
                     const lines = content.split('\n');
                     
-                    // Clear existing events in local storage
                     localStorage.removeItem('events');
                     
-                    // Initialize an empty events array
                     const events = [];
                     
-                    // Skip the first line (headers) and parse the rest
                     for (let i = 1; i < lines.length; i++) {
                         const line = lines[i].trim();
-                        if (line) {  // Make sure it's not an empty line
+                        if (line) {
                             const [name, date, time] = line.split(',');
                             events.push({ name: name.trim(), date: date.trim(), time: time.trim() });
                         }
                     }
                     
-                    // Store the events in local storage
                     localStorage.setItem('events', JSON.stringify(events));
                     
-                    // Reload the events into the table
                     loadEvents(filterSelect.value);
                     
-                    // Reset the file input field
                     event.target.value = '';
                 };
                 
                 reader.readAsText(file);
             });
-            
-            function loadEvents(filter = 'all') {
-                const events = JSON.parse(localStorage.getItem('events')) || [];
-                table.innerHTML = ''; // Clear existing rows
-    
-                const today = new Date();
-                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-                const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
-    
-                events.forEach((event, index) => {
-                    const eventDate = new Date(event.date);
-                    if (filter === 'week' && (eventDate < startOfWeek || eventDate > endOfWeek)) {
-                        return;
-                    }
-    
-                    const newRow = table.insertRow();
-                    newRow.insertCell(0).textContent = event.name;
-                    newRow.insertCell(1).textContent = event.date;
-                    newRow.insertCell(2).textContent = event.time;
-    
-                    // Add Select Button
-                    const selectButton = document.createElement('button');
-                    selectButton.textContent = 'Select';
-                    selectButton.className = 'select-button';
-                    selectButton.onclick = () => {
-                        // Pre-fill the form with the selected event data
-                        eventNameField.value = event.name;
-                        eventDateField.value = event.date;
-                        eventTimeField.value = event.time;
-                        editIndexField.value = index;
-                        selectedEventIndex = index; // Store the index of the event being edited
-    
-                        // Highlight selected row
-                        Array.from(table.rows).forEach(row => row.classList.remove('highlighted'));
-                        newRow.classList.add('highlighted');
-                    };
-                    newRow.insertCell(3).appendChild(selectButton);
-                });
-            }
-    
-            loadEvents(); // Load events on page load
-    
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-    
-                const eventName = eventNameField.value;
-                const eventDate = eventDateField.value;
-                const eventTime = eventTimeField.value;
-                const editIndex = editIndexField.value;
-    
-                const events = JSON.parse(localStorage.getItem('events')) || [];
-    
-                if (editIndex === '') {
-                    events.push({ name: eventName, date: eventDate, time: eventTime });
-                } else {
-                    events[editIndex] = { name: eventName, date: eventDate, time: eventTime };
-                }
-    
-                localStorage.setItem('events', JSON.stringify(events));
-                loadEvents(filterSelect.value); // Reload events with the selected filter
-                form.reset();
-                editIndexField.value = '';
-                selectedEventIndex = null; // Reset selected event index
-            });
-    
-            document.getElementById('clearAll').addEventListener('click', function () {
-                localStorage.removeItem('events');
-                table.innerHTML = '';
-            });
-    
-            filterSelect.addEventListener('change', function () {
-                loadEvents(this.value);
-            });
-    
-            document.getElementById('exportCSV').addEventListener('click', function () {
-                const events = JSON.parse(localStorage.getItem('events')) || [];
-                let csvContent = "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
-    
-                events.forEach(event => {
-                    const row = `${event.name},${event.date},${event.time}`;
-                    csvContent += row + "\n";
-                });
-    
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement('a');
-                link.setAttribute('href', encodedUri);
-                link.setAttribute('download', 'events.csv');
-                document.body.appendChild(link); // Required for Firefox
-    
-                link.click();
-                document.body.removeChild(link);
-            });
-    
-            // Delete Selected Event Functionality
+
             document.getElementById('deleteSelected').addEventListener('click', function () {
                 if (selectedEventIndex !== null) {
                     const events = JSON.parse(localStorage.getItem('events')) || [];
-    
-                    // Remove the selected event
                     events.splice(selectedEventIndex, 1);
-    
                     localStorage.setItem('events', JSON.stringify(events));
-                    loadEvents(filterSelect.value); // Reload events
-    
-                    // Reset selected event index and form
+                    loadEvents(filterSelect.value);
                     selectedEventIndex = null;
                     form.reset();
                 } else {
                     alert('Please select an event to delete.');
                 }
             });
-    
-            // Sort Table Functionality
+
             function sortTable(n) {
-                const table = document.getElementById('eventTable');
-                const rows = Array.from(table.getElementsByTagName('tbody')[0].rows);
-                const isAscending = table.getElementsByTagName('th')[n].classList.contains('asc');
-    
-                rows.sort((a, b) => {
-                    const aText = a.getElementsByTagName('td')[n].textContent;
-                    const bText = b.getElementsByTagName('td')[n].textContent;
-    
-                    if (isAscending) {
-                        return aText > bText ? 1 : -1;
-                    } else {
-                        return aText < bText ? 1 : -1;
+                var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                table = document.getElementById("eventTable");
+                switching = true;
+                dir = "asc";
+                while (switching) {
+                    switching = false;
+                    rows = table.rows;
+                    for (i = 1; i < (rows.length - 1); i++) {
+                        shouldSwitch = false;
+                        x = rows[i].getElementsByTagName("TD")[n];
+                        y = rows[i + 1].getElementsByTagName("TD")[n];
+                        if (dir == "asc") {
+                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else if (dir == "desc") {
+                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
                     }
-                });
-    
-                table.getElementsByTagName('tbody')[0].append(...rows);
-    
-                // Toggle sort direction
-                table.getElementsByTagName('th')[n].classList.toggle('asc', !isAscending);
-                table.getElementsByTagName('th')[n].classList.toggle('desc', isAscending);
+                    if (shouldSwitch) {
+                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                        switching = true;
+                        switchcount++;
+                    } else {
+                        if (switchcount == 0 && dir == "asc") {
+                            dir = "desc";
+                            switching = true;
+                        }
+                    }
+                }
             }
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                events: function(start, end, timezone, callback) {
+                    const events = JSON.parse(localStorage.getItem('events')) || [];
+                    const calendarEvents = events.map(event => ({
+                        title: event.name,
+                        start: event.date + 'T' + event.time,
+                        allDay: false
+                    }));
+                    callback(calendarEvents);
+                },
+                eventClick: function(calEvent, jsEvent, view) {
+                    const events = JSON.parse(localStorage.getItem('events')) || [];
+                    const selectedEvent = events.find(event => 
+                        event.name === calEvent.title && 
+                        event.date + 'T' + event.time === calEvent.start.format()
+                    );
+                    if (selectedEvent) {
+                        eventNameField.value = selectedEvent.name;
+                        eventDateField.value = selectedEvent.date;
+                        eventTimeField.value = selectedEvent.time;
+                        editIndexField.value = events.indexOf(selectedEvent);
+                        selectedEventIndex = events.indexOf(selectedEvent);
+                    }
+                }
+            });
+
+            function updateCalendar() {
+                $('#calendar').fullCalendar('removeEvents');
+                const events = JSON.parse(localStorage.getItem('events')) || [];
+                const calendarEvents = events.map(event => ({
+                    title: event.name,
+                    start: event.date + 'T' + event.time,
+                    allDay: false
+                }));
+                $('#calendar').fullCalendar('addEventSource', calendarEvents);
+            }
+
+            viewSelect.addEventListener('change', function() {
+                const listView = document.querySelector('.table-container');
+                const calendarView = document.querySelector('.calendar-container');
+                
+                if (this.value === 'list') {
+                    listView.style.display = 'block';
+                    calendarView.style.display = 'none';
+                } else {
+                    listView.style.display = 'none';
+                    calendarView.style.display = 'block';
+                    $('#calendar').fullCalendar('render');
+                }
+            });
+
+            // Initialize the view based on the initial selection
+            viewSelect.dispatchEvent(new Event('change'));
         });
-    </script>    
+    </script>
 </body>
 
 </html>

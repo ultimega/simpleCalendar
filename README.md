@@ -1,2 +1,2 @@
-# CalAid
-Simple caledar app
+# Simple Calendar App
+

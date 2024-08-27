@@ -1,2 +1,0 @@
-# CalAid
-Simple caledar app

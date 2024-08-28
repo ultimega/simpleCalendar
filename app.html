@@ -207,12 +207,25 @@
         .last-selected {
             background-color: #c8e6c9;
         }
+        .search-filter-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .search-filter-container input,
+        .search-filter-container select {
+            margin-bottom: 10px;
+        }
+        .search-filter-container button {
+            margin-right: 10px;
+        }
     </style>
 </head>
 
 <body>
     <div class="form-container">
-        <h2>Add Event</h2>
+        <h2>Add Event</h2> 
         <form id="eventForm">
             <input type="hidden" id="editIndex">
             <label for="eventName">Event Name:</label>
@@ -247,6 +260,21 @@
                     <option value="list">List View</option>
                     <option value="calendar">Calendar View</option>
                 </select>
+            </div>
+
+            <div class="search-filter-container">
+                <h3>Search & Filter</h3>
+                <input type="text" id="searchInput" placeholder="Search events...">
+                <input type="date" id="startDate" placeholder="Start Date">
+                <input type="date" id="endDate" placeholder="End Date">
+                <select id="searchField">
+                    <option value="all">All Fields</option>
+                    <option value="name">Name</option>
+                    <option value="date">Date</option>
+                    <option value="time">Time</option>
+                </select>
+                <button id="searchButton">Search</button>
+                <button id="resetButton">Reset</button>
             </div>
         </form>
     </div>
@@ -285,6 +313,12 @@
             const filterSelect = document.getElementById('filterSelect');
             const viewSelect = document.getElementById('viewSelect');
             const selectAllButton = document.getElementById('selectAll');
+            const searchInput = document.getElementById('searchInput');
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            const searchField = document.getElementById('searchField');
+            const searchButton = document.getElementById('searchButton');
+            const resetButton = document.getElementById('resetButton');
             let selectedEvents = new Set();
             let lastSelectedIndex = null;
             let currentSortColumn = null;
@@ -295,20 +329,47 @@
             eventDateField.value = now.toISOString().split('T')[0];
             eventTimeField.value = now.toTimeString().split(' ')[0].slice(0, 5);
 
-            function loadEvents(filter = 'all') {
+            function loadEvents(filter = 'all', searchParams = null) {
                 const events = JSON.parse(localStorage.getItem('events')) || [];
                 tbody.innerHTML = '';
 
-                const today = new Date();
-                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-                const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+                const filteredEvents = events.filter(event => {
+                    if (searchParams) {
+                        const { searchTerm, start, end, field } = searchParams;
+                        const eventDate = new Date(event.date);
+                        
+                        // Check date range
+                        if (start && end) {
+                            if (eventDate < new Date(start) || eventDate > new Date(end)) {
+                                return false;
+                            }
+                        }
 
-                events.forEach((event, index) => {
-                    const eventDate = new Date(event.date);
-                    if (filter === 'week' && (eventDate < startOfWeek || eventDate > endOfWeek)) {
-                        return;
+                        // Check search term
+                        if (searchTerm) {
+                            if (field === 'all') {
+                                return Object.values(event).some(value => 
+                                    value.toLowerCase().includes(searchTerm.toLowerCase())
+                                );
+                            } else {
+                                return event[field].toLowerCase().includes(searchTerm.toLowerCase());
+                            }
+                        }
                     }
 
+                    // Apply existing filter
+                    if (filter === 'week') {
+                        const today = new Date();
+                        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                        const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+                        const eventDate = new Date(event.date);
+                        return eventDate >= startOfWeek && eventDate <= endOfWeek;
+                    }
+
+                    return true;
+                });
+
+                filteredEvents.forEach((event, index) => {
                     const newRow = tbody.insertRow();
                     const checkboxCell = newRow.insertCell(0);
                     const checkbox = document.createElement('input');
@@ -329,7 +390,7 @@
                     }
                 });
 
-                updateCalendar();
+                updateCalendar(filteredEvents);
                 if (currentSortColumn !== null) {
                     sortTable(currentSortColumn, currentSortDirection);
                 }
@@ -364,8 +425,6 @@
                     editIndexField.value = index;
                 }
             }
-
-            loadEvents();
 
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
@@ -562,6 +621,17 @@
                 }
             });
 
+            function updateCalendar(events) {
+                $('#calendar').fullCalendar('removeEvents');
+                const calendarEvents = events.map(event => ({
+                    title: event.name,
+                    start: event.date + 'T' + event.time,
+                    allDay: false,
+                    originalEvent: event
+                }));
+                $('#calendar').fullCalendar('addEventSource', calendarEvents);
+            }
+
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
@@ -603,18 +673,6 @@
                 }
             });
 
-            function updateCalendar() {
-                $('#calendar').fullCalendar('removeEvents');
-                const events = JSON.parse(localStorage.getItem('events')) || [];
-                const calendarEvents = events.map(event => ({
-                    title: event.name,
-                    start: event.date + 'T' + event.time,
-                    allDay: false,
-                    originalEvent: event
-                }));
-                $('#calendar').fullCalendar('addEventSource', calendarEvents);
-            }
-
             viewSelect.addEventListener('change', function() {
                 const listView = document.querySelector('.table-container');
                 const calendarView = document.querySelector('.calendar-container');
@@ -640,6 +698,23 @@
                         th.classList.remove('asc', 'desc');
                     });
                 }
+            });
+
+            searchButton.addEventListener('click', function() {
+                const searchTerm = searchInput.value;
+                const start = startDate.value;
+                const end = endDate.value;
+                const field = searchField.value;
+
+                loadEvents(filterSelect.value, { searchTerm, start, end, field });
+            });
+
+            resetButton.addEventListener('click', function() {
+                searchInput.value = '';
+                startDate.value = '';
+                endDate.value = '';
+                searchField.value = 'all';
+                loadEvents(filterSelect.value);
             });
 
             // Initialize the view and load events

@@ -1,726 +1,797 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interactive Calendar App</title>
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #e8f0ff, #d1e7ff);
-            overflow: hidden;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #e8f0ff, #d1e7ff);
+        overflow: hidden;
+      }
 
-        .form-container {
-            width: 320px;
-            background-color: #fff;
-            padding: 20px;
-            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            border-radius: 10px;
-            transform: translateZ(0);
-        }
+      .form-container {
+        width: 320px;
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 3px 0 8px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        border-radius: 10px;
+        transform: translateZ(0);
+      }
 
-        .form-container h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            text-transform: uppercase;
-            color: #343a40;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-        }
+      .form-container h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+        text-transform: uppercase;
+        color: #343a40;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+      }
 
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-            background-color: #f8f9fa;
-            box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+        background-color: #f8f9fa;
+        box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+      }
 
-        input:focus, select:focus {
-            outline: none;
-            transform: scale(1.02);
-        }
+      input:focus,
+      select:focus {
+        outline: none;
+        transform: scale(1.02);
+      }
 
-        .form-actions {
-            display: flex;
-            flex-direction: column;
-            margin-top: 10px;
-        }
+      .form-actions {
+        display: flex;
+        flex-direction: column;
+        margin-top: 10px;
+      }
 
-        .form-actions button,
-        .form-actions input[type="file"] {
-            padding: 12px;
-            background-color: #343a40;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            transition: box-shadow 0.3s ease;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-        }
+      .form-actions button,
+      .form-actions input[type="file"] {
+        padding: 12px;
+        background-color: #343a40;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: box-shadow 0.3s ease;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      }
 
-        .form-actions button.clear-button {
-            background-color: #dc3545;
-        }
+      .form-actions button#deleteSelected {
+        background-color: #dc3545;
+      }
 
-        .form-actions button:hover {
-            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-        }
+      .form-actions button:hover {
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+      }
 
-        .form-actions button.clear-button:hover {
-            background-color: #c82333;
-        }
+      .form-actions button#deleteSelected:hover {
+        background-color: #c82333;
+      }
 
-        .form-actions input[type="file"] {
-            border: 1px dashed #ced4da;
-        }
+      .form-actions input[type="file"] {
+        border: 1px dashed #ced4da;
+      }
 
-        .form-actions input[type="file"]:hover {
-            border: 1px solid #343a40;
-        }
+      .form-actions input[type="file"]:hover {
+        border: 1px solid #343a40;
+      }
 
-        .content-container {
-            flex: 1;
-            margin-left: 340px;
-            padding: 20px;
-            overflow-y: auto;
-            background: linear-gradient(135deg, #ffffff, #f2f4f7);
-            border-radius: 15px;
-            box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
-        }
+      .content-container {
+        flex: 1;
+        margin-left: 340px;
+        padding: 20px;
+        overflow-y: auto;
+        background: linear-gradient(135deg, #ffffff, #f2f4f7);
+        border-radius: 15px;
+        box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+      }
 
-        .table-container, .calendar-container {
-            display: none;
-        }
+      .table-container,
+      .calendar-container {
+        display: none;
+      }
 
-        h2 {
-            margin-bottom: 20px;
-            font-size: 22px;
-            text-transform: uppercase;
-            color: #495057;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        }
+      h2 {
+        margin-bottom: 20px;
+        font-size: 22px;
+        text-transform: uppercase;
+        color: #495057;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
 
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+      }
 
-        th {
-            background-color: #343a40;
-            color: white;
-            cursor: pointer;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.2s ease;
-        }
+      th {
+        background-color: #343a40;
+        color: white;
+        cursor: pointer;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.2s ease;
+      }
 
-        th:hover {
-            background-color: #495057;
-        }
+      th:hover {
+        background-color: #495057;
+      }
 
-        th.asc::after {
-            content: " 🔼";
-        }
+      th.asc::after {
+        content: " 🔼";
+      }
 
-        th.desc::after {
-            content: " 🔽";
-        }
+      th.desc::after {
+        content: " 🔽";
+      }
 
-        .highlighted {
-            background-color: #e9ecef;
-        }
+      .highlighted {
+        background-color: #e9ecef;
+      }
 
-        #calendar {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+      #calendar {
+        max-width: 900px;
+        margin: 0 auto;
+      }
 
-        .fc-event {
-            cursor: pointer;
-        }
-        .fc-event.selected {
-            background-color: #007bff;
-            border-color: #0056b3;
-        }
-        th {
-            cursor: pointer;
-        }
-        th:hover {
-            background-color: #495057;
-        }
-        th::after {
-            content: '\00a0\25B4\25BE';
-            font-size: 0.8em;
-            color: #adb5bd;
-        }
-        th.asc::after {
-            content: '\00a0\25B4';
-            color: white;
-        }
-        th.desc::after {
-            content: '\00a0\25BE';
-            color: white;
-        }
-        .selected {
-            background-color: #e6f3ff;
-        }
-        .last-selected {
-            background-color: #c8e6c9;
-        }
-        .search-filter-container {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        .search-filter-container input,
-        .search-filter-container select {
-            margin-bottom: 10px;
-        }
-        .search-filter-container button {
-            margin-right: 10px;
-        }
+      .fc-event {
+        cursor: pointer;
+      }
+      .fc-event.selected {
+        background-color: #007bff;
+        border-color: #0056b3;
+      }
+      th {
+        cursor: pointer;
+      }
+      th:hover {
+        background-color: #495057;
+      }
+      th::after {
+        content: "\00a0\25B4\25BE";
+        font-size: 0.8em;
+        color: #adb5bd;
+      }
+      th.asc::after {
+        content: "\00a0\25B4";
+        color: white;
+      }
+      th.desc::after {
+        content: "\00a0\25BE";
+        color: white;
+      }
+      .selected {
+        background-color: #e6f3ff;
+      }
+      .last-selected {
+        background-color: #c8e6c9;
+      }
+      .search-filter-container {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+      .search-filter-container input,
+      .search-filter-container select {
+        margin-bottom: 10px;
+      }
+      .search-filter-container button {
+        margin-right: 10px;
+      }
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="form-container">
-        <h2>Add Event</h2>
-        <form id="eventForm">
-            <input type="hidden" id="editIndex">
-            <label for="eventName">Event Name:</label>
-            <input type="text" id="eventName" required>
+      <h2>Add Event</h2>
+      <form id="eventForm">
+        <input type="hidden" id="editIndex" />
+        <label for="eventName">Event Name:</label>
+        <input type="text" id="eventName" required />
 
-            <label for="eventDate">Date:</label>
-            <input type="date" id="eventDate" required>
+        <label for="eventDate">Date:</label>
+        <input type="date" id="eventDate" required />
 
-            <label for="eventTime">Time:</label>
-            <input type="time" id="eventTime" required>
+        <label for="eventTime">Time:</label>
+        <input type="time" id="eventTime" required />
 
-            <div class="form-actions">
-                <button type="submit">Add/Update Event</button>
-                <button type="button" id="deleteSelected">Delete Selected</button>
-                <button type="button" class="clear-button" id="clearAll">Clear All</button>
-                <button type="button" id="exportCSV">Export as CSV</button>
-                <label for="loadCSV">Load CSV:</label>
-                <input type="file" id="loadCSV" accept=".csv" />
-            </div>
+        <div class="form-actions">
+          <button type="submit">Add/Update Event</button>
+          <button type="button" id="deleteSelected">Delete Selected</button>
+          <button type="button" id="exportCSV">Export as CSV</button>
+          <label for="loadCSV">Load CSV:</label>
+          <input type="file" id="loadCSV" accept=".csv" />
+        </div>
 
-            <div class="filter-options">
-                <label for="filterSelect">Show:</label>
-                <select id="filterSelect">
-                    <option value="all">All Events</option>
-                    <option value="week">Events This Week</option>
-                </select>
-            </div>
+        <div class="filter-options">
+          <label for="filterSelect">Show:</label>
+          <select id="filterSelect">
+            <option value="all">All Events</option>
+            <option value="week">Events This Week</option>
+          </select>
+        </div>
 
-            <div class="view-options">
-                <label for="viewSelect">View:</label>
-                <select id="viewSelect">
-                    <option value="list">List View</option>
-                    <option value="calendar">Calendar View</option>
-                </select>
-            </div>
+        <div class="view-options">
+          <label for="viewSelect">View:</label>
+          <select id="viewSelect">
+            <option value="list">List View</option>
+            <option value="calendar">Calendar View</option>
+          </select>
+        </div>
 
-            <div class="search-filter-container">
-                <h3>Search & Filter</h3>
-                <input type="text" id="searchInput" placeholder="Search events...">
-                <input type="date" id="startDate" placeholder="Start Date">
-                <input type="date" id="endDate" placeholder="End Date">
-                <select id="searchField">
-                    <option value="all">All Fields</option>
-                    <option value="name">Name</option>
-                    <option value="date">Date</option>
-                    <option value="time">Time</option>
-                </select>
-                <button id="searchButton">Search</button>
-                <button id="resetButton">Reset</button>
-            </div>
-        </form>
+        <div class="search-filter-container">
+          <h3>Search & Filter</h3>
+          <input type="text" id="searchInput" placeholder="Search events..." />
+          <input type="date" id="startDate" placeholder="Start Date" />
+          <input type="date" id="endDate" placeholder="End Date" />
+          <select id="searchField">
+            <option value="all">All Fields</option>
+            <option value="name">Name</option>
+            <option value="date">Date</option>
+            <option value="time">Time</option>
+          </select>
+          <button id="searchButton">Search</button>
+          <button id="resetButton">Reset</button>
+        </div>
+      </form>
     </div>
 
     <div class="content-container">
-        <div class="table-container">
-            <h2>Stored Events</h2>
-            <button id="selectAll" type="button">Select All</button>
-            <table id="eventTable">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th onclick="sortTable(1)">Event Name</th>
-                        <th onclick="sortTable(2)">Date</th>
-                        <th onclick="sortTable(3)">Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <div class="calendar-container">
-            <div id="calendar"></div>
-        </div>
+      <div class="table-container">
+        <h2>Stored Events</h2>
+        <button id="selectAll" type="button">Select All</button>
+        <button id="selectBetween" type="button">Select Between</button>
+        <table id="eventTable">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th onclick="sortTable(1)">Event Name</th>
+              <th onclick="sortTable(2)">Date</th>
+              <th onclick="sortTable(3)">Time</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="calendar-container">
+        <div id="calendar"></div>
+      </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const form = document.getElementById('eventForm');
-            const table = document.getElementById('eventTable');
-            const tbody = table.getElementsByTagName('tbody')[0];
-            const eventNameField = document.getElementById('eventName');
-            const eventDateField = document.getElementById('eventDate');
-            const eventTimeField = document.getElementById('eventTime');
-            const editIndexField = document.getElementById('editIndex');
-            const filterSelect = document.getElementById('filterSelect');
-            const viewSelect = document.getElementById('viewSelect');
-            const selectAllButton = document.getElementById('selectAll');
-            const searchInput = document.getElementById('searchInput');
-            const startDate = document.getElementById('startDate');
-            const endDate = document.getElementById('endDate');
-            const searchField = document.getElementById('searchField');
-            const searchButton = document.getElementById('searchButton');
-            const resetButton = document.getElementById('resetButton');
-            let selectedEvents = new Set();
-            let lastSelectedIndex = null;
-            let currentSortColumn = null;
-            let currentSortDirection = 'asc';
+      document.addEventListener("DOMContentLoaded", (event) => {
+        const form = document.getElementById("eventForm");
+        const table = document.getElementById("eventTable");
+        const tbody = table.getElementsByTagName("tbody")[0];
+        const eventNameField = document.getElementById("eventName");
+        const eventDateField = document.getElementById("eventDate");
+        const eventTimeField = document.getElementById("eventTime");
+        const editIndexField = document.getElementById("editIndex");
+        const filterSelect = document.getElementById("filterSelect");
+        const viewSelect = document.getElementById("viewSelect");
+        const selectAllButton = document.getElementById("selectAll");
+        const selectBetweenButton = document.getElementById("selectBetween");
+        const searchInput = document.getElementById("searchInput");
+        const startDate = document.getElementById("startDate");
+        const endDate = document.getElementById("endDate");
+        const searchField = document.getElementById("searchField");
+        const searchButton = document.getElementById("searchButton");
+        const resetButton = document.getElementById("resetButton");
+        let selectedEvents = new Set();
+        let lastSelectedIndex = null;
+        let currentSortColumn = null;
+        let currentSortDirection = "asc";
 
+        // Prefill date and time with current info
+        const now = new Date();
+        eventDateField.value = now.toISOString().split("T")[0];
+        eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
+
+        function loadEvents(filter = "all", searchParams = null) {
+          const events = JSON.parse(localStorage.getItem("events")) || [];
+          tbody.innerHTML = "";
+
+          const filteredEvents = events.filter((event) => {
+            if (searchParams) {
+              const { searchTerm, start, end, field } = searchParams;
+              const eventDate = new Date(event.date);
+
+              // Check date range
+              if (start && end) {
+                if (eventDate < new Date(start) || eventDate > new Date(end)) {
+                  return false;
+                }
+              }
+
+              // Check search term
+              if (searchTerm) {
+                if (field === "all") {
+                  return Object.values(event).some((value) =>
+                    value.toLowerCase().includes(searchTerm.toLowerCase())
+                  );
+                } else {
+                  return event[field]
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase());
+                }
+              }
+            }
+
+            // Apply existing filter
+            if (filter === "week") {
+              const today = new Date();
+              const startOfWeek = new Date(
+                today.setDate(today.getDate() - today.getDay())
+              );
+              const endOfWeek = new Date(
+                today.setDate(today.getDate() - today.getDay() + 6)
+              );
+              const eventDate = new Date(event.date);
+              return eventDate >= startOfWeek && eventDate <= endOfWeek;
+            }
+
+            return true;
+          });
+
+          filteredEvents.forEach((event, index) => {
+            const newRow = tbody.insertRow();
+            const checkboxCell = newRow.insertCell(0);
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.onclick = () => toggleEventSelection(index, newRow);
+            checkboxCell.appendChild(checkbox);
+
+            newRow.insertCell(1).textContent = event.name;
+            newRow.insertCell(2).textContent = event.date;
+            newRow.insertCell(3).textContent = event.time;
+
+            if (selectedEvents.has(index)) {
+              checkbox.checked = true;
+              newRow.classList.add("selected");
+            }
+            if (index === lastSelectedIndex) {
+              newRow.classList.add("last-selected");
+            }
+          });
+
+          updateCalendar(filteredEvents);
+          if (currentSortColumn !== null) {
+            sortTable(currentSortColumn, currentSortDirection);
+          }
+        }
+
+        function toggleEventSelection(index, element) {
+          if (selectedEvents.has(index)) {
+            selectedEvents.delete(index);
+            element.classList.remove("selected");
+          } else {
+            selectedEvents.add(index);
+            element.classList.add("selected");
+          }
+
+          // Update last selected
+          if (lastSelectedIndex !== null) {
+            const lastSelectedRow = tbody.rows[lastSelectedIndex];
+            if (lastSelectedRow) {
+              lastSelectedRow.classList.remove("last-selected");
+            }
+          }
+          lastSelectedIndex = index;
+          element.classList.add("last-selected");
+
+          // Prefill form with last selected item
+          const events = JSON.parse(localStorage.getItem("events")) || [];
+          const event = events[index];
+          if (event) {
+            eventNameField.value = event.name;
+            eventDateField.value = event.date;
+            eventTimeField.value = event.time;
+            editIndexField.value = index;
+          }
+        }
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+  
+            const eventName = eventNameField.value;
+            const eventDate = eventDateField.value;
+            const eventTime = eventTimeField.value;
+            const editIndex = editIndexField.value;
+  
+            const events = JSON.parse(localStorage.getItem("events")) || [];
+  
+            if (editIndex === "") {
+              events.push({ name: eventName, date: eventDate, time: eventTime });
+            } else {
+              events[editIndex] = {
+                name: eventName,
+                date: eventDate,
+                time: eventTime,
+              };
+            }
+  
+            localStorage.setItem("events", JSON.stringify(events));
+            loadEvents(filterSelect.value);
+            form.reset();
+            editIndexField.value = "";
+            selectedEvents.clear();
+            lastSelectedIndex = null;
+  
             // Prefill date and time with current info
             const now = new Date();
-            eventDateField.value = now.toISOString().split('T')[0];
-            eventTimeField.value = now.toTimeString().split(' ')[0].slice(0, 5);
-
-            function loadEvents(filter = 'all', searchParams = null) {
-                const events = JSON.parse(localStorage.getItem('events')) || [];
-                tbody.innerHTML = '';
-
-                const filteredEvents = events.filter(event => {
-                    if (searchParams) {
-                        const { searchTerm, start, end, field } = searchParams;
-                        const eventDate = new Date(event.date);
-                        
-                        // Check date range
-                        if (start && end) {
-                            if (eventDate < new Date(start) || eventDate > new Date(end)) {
-                                return false;
-                            }
-                        }
-
-                        // Check search term
-                        if (searchTerm) {
-                            if (field === 'all') {
-                                return Object.values(event).some(value => 
-                                    value.toLowerCase().includes(searchTerm.toLowerCase())
-                                );
-                            } else {
-                                return event[field].toLowerCase().includes(searchTerm.toLowerCase());
-                            }
-                        }
-                    }
-
-                    // Apply existing filter
-                    if (filter === 'week') {
-                        const today = new Date();
-                        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-                        const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
-                        const eventDate = new Date(event.date);
-                        return eventDate >= startOfWeek && eventDate <= endOfWeek;
-                    }
-
-                    return true;
-                });
-
-                filteredEvents.forEach((event, index) => {
-                    const newRow = tbody.insertRow();
-                    const checkboxCell = newRow.insertCell(0);
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.onclick = () => toggleEventSelection(index, newRow);
-                    checkboxCell.appendChild(checkbox);
-
-                    newRow.insertCell(1).textContent = event.name;
-                    newRow.insertCell(2).textContent = event.date;
-                    newRow.insertCell(3).textContent = event.time;
-
-                    if (selectedEvents.has(index)) {
-                        checkbox.checked = true;
-                        newRow.classList.add('selected');
-                    }
-                    if (index === lastSelectedIndex) {
-                        newRow.classList.add('last-selected');
-                    }
-                });
-
-                updateCalendar(filteredEvents);
-                if (currentSortColumn !== null) {
-                    sortTable(currentSortColumn, currentSortDirection);
+            eventDateField.value = now.toISOString().split("T")[0];
+            eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
+          });
+  
+          document
+            .getElementById("exportCSV")
+            .addEventListener("click", function () {
+              const events = JSON.parse(localStorage.getItem("events")) || [];
+              let csvContent =
+                "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
+  
+              events.forEach((event) => {
+                const row = `${event.name},${event.date},${event.time}`;
+                csvContent += row + "\n";
+              });
+  
+              const encodedUri = encodeURI(csvContent);
+              const link = document.createElement("a");
+              link.setAttribute("href", encodedUri);
+              link.setAttribute("download", "events.csv");
+              document.body.appendChild(link);
+  
+              link.click();
+              document.body.removeChild(link);
+            });
+  
+          document
+            .getElementById("loadCSV")
+            .addEventListener("change", function (event) {
+              const file = event.target.files[0];
+              const reader = new FileReader();
+  
+              reader.onload = function (e) {
+                const content = e.target.result;
+                const lines = content.split("\n");
+  
+                localStorage.removeItem("events");
+  
+                const events = [];
+  
+                for (let i = 1; i < lines.length; i++) {
+                  const line = lines[i].trim();
+                  if (line) {
+                    const [name, date, time] = line.split(",");
+                    events.push({
+                      name: name.trim(),
+                      date: date.trim(),
+                      time: time.trim(),
+                    });
+                  }
                 }
-            }
-
-            function toggleEventSelection(index, element) {
-                if (selectedEvents.has(index)) {
-                    selectedEvents.delete(index);
-                    element.classList.remove('selected');
-                } else {
-                    selectedEvents.add(index);
-                    element.classList.add('selected');
-                }
-
-                // Update last selected
-                if (lastSelectedIndex !== null) {
-                    const lastSelectedRow = tbody.rows[lastSelectedIndex];
-                    if (lastSelectedRow) {
-                        lastSelectedRow.classList.remove('last-selected');
-                    }
-                }
-                lastSelectedIndex = index;
-                element.classList.add('last-selected');
-
-                // Prefill form with last selected item
-                const events = JSON.parse(localStorage.getItem('events')) || [];
-                const event = events[index];
-                if (event) {
-                    eventNameField.value = event.name;
-                    eventDateField.value = event.date;
-                    eventTimeField.value = event.time;
-                    editIndexField.value = index;
-                }
-            }
-
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                const eventName = eventNameField.value;
-                const eventDate = eventDateField.value;
-                const eventTime = eventTimeField.value;
-                const editIndex = editIndexField.value;
-
-                const events = JSON.parse(localStorage.getItem('events')) || [];
-
-                if (editIndex === '') {
-                    events.push({ name: eventName, date: eventDate, time: eventTime });
-                } else {
-                    events[editIndex] = { name: eventName, date: eventDate, time: eventTime };
-                }
-
-                localStorage.setItem('events', JSON.stringify(events));
+  
+                localStorage.setItem("events", JSON.stringify(events));
+  
                 loadEvents(filterSelect.value);
-                form.reset();
-                editIndexField.value = '';
+  
+                event.target.value = "";
+              };
+  
+              reader.readAsText(file);
+            });
+  
+          selectAllButton.addEventListener("click", function () {
+            const checkboxes = tbody.querySelectorAll('input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+  
+            checkboxes.forEach((checkbox, index) => {
+              checkbox.checked = !allChecked;
+              const row = checkbox.closest("tr");
+              if (!allChecked) {
+                selectedEvents.add(index);
+                row.classList.add("selected");
+              } else {
+                selectedEvents.delete(index);
+                row.classList.remove("selected");
+              }
+            });
+  
+            if (selectedEvents.size > 0) {
+              lastSelectedIndex = Math.max(...selectedEvents);
+              const lastSelectedRow = tbody.rows[lastSelectedIndex];
+              if (lastSelectedRow) {
+                lastSelectedRow.classList.add("last-selected");
+              }
+              const events = JSON.parse(localStorage.getItem("events")) || [];
+              const event = events[lastSelectedIndex];
+              if (event) {
+                eventNameField.value = event.name;
+                eventDateField.value = event.date;
+                eventTimeField.value = event.time;
+                editIndexField.value = lastSelectedIndex;
+              }
+            } else {
+              lastSelectedIndex = null;
+              form.reset();
+              editIndexField.value = "";
+              // Prefill date and time with current info
+              const now = new Date();
+              eventDateField.value = now.toISOString().split("T")[0];
+              eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
+            }
+          });
+  
+          selectBetweenButton.addEventListener("click", function () {
+            const checkboxes = Array.from(tbody.querySelectorAll('input[type="checkbox"]'));
+            const selectedIndices = checkboxes.reduce((acc, checkbox, index) => {
+              if (checkbox.checked) acc.push(index);
+              return acc;
+            }, []);
+  
+            if (selectedIndices.length !== 2) {
+              alert("Please select exactly two events to select between.");
+              return;
+            }
+  
+            const [start, end] = selectedIndices.sort((a, b) => a - b);
+  
+            checkboxes.forEach((checkbox, index) => {
+              if (index >= start && index <= end) {
+                checkbox.checked = true;
+                selectedEvents.add(index);
+                checkbox.closest("tr").classList.add("selected");
+              }
+            });
+  
+            lastSelectedIndex = end;
+            const lastSelectedRow = tbody.rows[lastSelectedIndex];
+            if (lastSelectedRow) {
+              lastSelectedRow.classList.add("last-selected");
+            }
+  
+            const events = JSON.parse(localStorage.getItem("events")) || [];
+            const event = events[lastSelectedIndex];
+            if (event) {
+              eventNameField.value = event.name;
+              eventDateField.value = event.date;
+              eventTimeField.value = event.time;
+              editIndexField.value = lastSelectedIndex;
+            }
+          });
+  
+          document
+            .getElementById("deleteSelected")
+            .addEventListener("click", function () {
+              if (selectedEvents.size > 0) {
+                const events = JSON.parse(localStorage.getItem("events")) || [];
+                const newEvents = events.filter(
+                  (_, index) => !selectedEvents.has(index)
+                );
+                localStorage.setItem("events", JSON.stringify(newEvents));
+                loadEvents(filterSelect.value);
                 selectedEvents.clear();
                 lastSelectedIndex = null;
-
-                // Prefill date and time with current info
-                const now = new Date();
-                eventDateField.value = now.toISOString().split('T')[0];
-                eventTimeField.value = now.toTimeString().split(' ')[0].slice(0, 5);
-            });
-
-            document.getElementById('clearAll').addEventListener('click', function () {
-                localStorage.removeItem('events');
-                loadEvents(filterSelect.value);
-                selectedEvents.clear();
-                lastSelectedIndex = null;
                 form.reset();
-                editIndexField.value = '';
+                editIndexField.value = "";
                 // Prefill date and time with current info
                 const now = new Date();
-                eventDateField.value = now.toISOString().split('T')[0];
-                eventTimeField.value = now.toTimeString().split(' ')[0].slice(0, 5);
+                eventDateField.value = now.toISOString().split("T")[0];
+                eventTimeField.value = now
+                  .toTimeString()
+                  .split(" ")[0]
+                  .slice(0, 5);
+              } else {
+                alert("Please select at least one event to delete.");
+              }
             });
-
-            filterSelect.addEventListener('change', function () {
-                loadEvents(this.value);
+  
+          function sortTable(column, direction = "asc") {
+            const rows = Array.from(tbody.rows);
+            const compare = (rowA, rowB) => {
+              const cellA = rowA.cells[column].textContent.trim();
+              const cellB = rowB.cells[column].textContent.trim();
+              return cellA.localeCompare(cellB, undefined, {
+                numeric: true,
+                sensitivity: "base",
+              });
+            };
+  
+            rows.sort((rowA, rowB) => {
+              return direction === "asc"
+                ? compare(rowA, rowB)
+                : compare(rowB, rowA);
             });
-
-            document.getElementById('exportCSV').addEventListener('click', function () {
-                const events = JSON.parse(localStorage.getItem('events')) || [];
-                let csvContent = "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
-
-                events.forEach(event => {
-                    const row = `${event.name},${event.date},${event.time}`;
-                    csvContent += row + "\n";
-                });
-
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement('a');
-                link.setAttribute('href', encodedUri);
-                link.setAttribute('download', 'events.csv');
-                document.body.appendChild(link);
-
-                link.click();
-                document.body.removeChild(link);
-            });
-
-            document.getElementById('loadCSV').addEventListener('change', function (event) {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-                
-                reader.onload = function (e) {
-                    const content = e.target.result;
-                    const lines = content.split('\n');
-                    
-                    localStorage.removeItem('events');
-                    
-                    const events = [];
-                    
-                    for (let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (line) {
-                            const [name, date, time] = line.split(',');
-                            events.push({ name: name.trim(), date: date.trim(), time: time.trim() });
-                        }
-                    }
-                    
-                    localStorage.setItem('events', JSON.stringify(events));
-                    
-                    loadEvents(filterSelect.value);
-                    
-                    event.target.value = '';
-                };
-                
-                reader.readAsText(file);
-            });
-
-            selectAllButton.addEventListener('click', function () {
-                const checkboxes = tbody.querySelectorAll('input[type="checkbox"]');
-                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-
-                checkboxes.forEach((checkbox, index) => {
-                    checkbox.checked = !allChecked;
-                    const row = checkbox.closest('tr');
-                    if (!allChecked) {
-                        selectedEvents.add(index);
-                        row.classList.add('selected');
-                    } else {
-                        selectedEvents.delete(index);
-                        row.classList.remove('selected');
-                    }
-                });
-
-                if (selectedEvents.size > 0) {
-                    lastSelectedIndex = Math.max(...selectedEvents);
-                    const lastSelectedRow = tbody.rows[lastSelectedIndex];
-                    if (lastSelectedRow) {
-                        lastSelectedRow.classList.add('last-selected');
-                    }
-                    const events = JSON.parse(localStorage.getItem('events')) || [];
-                    const event = events[lastSelectedIndex];
-                    if (event) {
-                        eventNameField.value = event.name;
-                        eventDateField.value = event.date;
-                        eventTimeField.value = event.time;
-                        editIndexField.value = lastSelectedIndex;
-                    }
-                } else {
-                    lastSelectedIndex = null;
-                    form.reset();
-                    editIndexField.value = '';
-                    // Prefill date and time with current info
-                    const now = new Date();
-                    eventDateField.value = now.toISOString().split('T')[0];
-                    eventTimeField.value = now.toTimeString().split(' ')[0].slice(0, 5);
+  
+            tbody.append(...rows);
+  
+            // Update sort indicators only for the list view
+            if (viewSelect.value === "list") {
+              Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
+                th.classList.remove("asc", "desc");
+                if (index === column) {
+                  th.classList.add(direction);
                 }
-            });
-
-            document.getElementById('deleteSelected').addEventListener('click', function () {
-                if (selectedEvents.size > 0) {
-                    const events = JSON.parse(localStorage.getItem('events')) || [];
-                    const newEvents = events.filter((_, index) => !selectedEvents.has(index));
-                    localStorage.setItem('events', JSON.stringify(newEvents));
-                    loadEvents(filterSelect.value);
-                    selectedEvents.clear();
-                    lastSelectedIndex = null;
-                    form.reset();
-                    editIndexField.value = '';
-                    // Prefill date and time with current info
-                    const now = new Date();
-                    eventDateField.value = now.toISOString().split('T')[0];
-                    eventTimeField.value = now.toTimeString().split(' ')[0].slice(0, 5);
-                } else {
-                    alert('Please select at least one event to delete.');
-                }
-            });
-
-            function sortTable(column, direction = 'asc') {
-                const rows = Array.from(tbody.rows);
-                const compare = (rowA, rowB) => {
-                    const cellA = rowA.cells[column].textContent.trim();
-                    const cellB = rowB.cells[column].textContent.trim();
-                    return cellA.localeCompare(cellB, undefined, { numeric: true, sensitivity: 'base' });
-                };
-
-                rows.sort((rowA, rowB) => {
-                    return direction === 'asc' ? compare(rowA, rowB) : compare(rowB, rowA);
-                });
-
-                tbody.append(...rows);
-
-                // Update sort indicators only for the list view
-                if (viewSelect.value === 'list') {
-                    Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
-                        th.classList.remove('asc', 'desc');
-                        if (index === column) {
-                            th.classList.add(direction);
-                        }
-                    });
-                }
-
-                currentSortColumn = column;
-                currentSortDirection = direction;
+              });
             }
-
-            // Add click event listeners to table headers for sorting (only in list view)
-            Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
-                if (index > 0) { // Skip the first column (checkbox column)
-                    th.addEventListener('click', () => {
-                        if (viewSelect.value === 'list') {
-                            const newDirection = th.classList.contains('asc') ? 'desc' : 'asc';
-                            sortTable(index, newDirection);
-                        }
-                    });
+  
+            currentSortColumn = column;
+            currentSortDirection = direction;
+          }
+  
+          // Add click event listeners to table headers for sorting (only in list view)
+          Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
+            if (index > 0) {
+              // Skip the first column (checkbox column)
+              th.addEventListener("click", () => {
+                if (viewSelect.value === "list") {
+                  const newDirection = th.classList.contains("asc")
+                    ? "desc"
+                    : "asc";
+                  sortTable(index, newDirection);
                 }
-            });
-
-            function updateCalendar(events) {
-                $('#calendar').fullCalendar('removeEvents');
-                const calendarEvents = events.map(event => ({
-                    title: event.name,
-                    start: event.date + 'T' + event.time,
-                    allDay: false,
-                    originalEvent: event
-                }));
-                $('#calendar').fullCalendar('addEventSource', calendarEvents);
+              });
             }
-
-            $('#calendar').fullCalendar({
-                header: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'month,agendaWeek,agendaDay'
-                },
-                events: function(start, end, timezone, callback) {
-                    const events = JSON.parse(localStorage.getItem('events')) || [];
-                    const calendarEvents = events.map(event => ({
-                        title: event.name,
-                        start: event.date + 'T' + event.time,
-                        allDay: false,
-                        originalEvent: event
-                    }));
-                    callback(calendarEvents);
-                },
-                eventClick: function(calEvent, jsEvent, view) {
-                    const events = JSON.parse(localStorage.getItem('events')) || [];
-                    const index = events.findIndex(event => 
-                        event.name === calEvent.title && 
-                        event.date + 'T' + event.time === calEvent.start.format()
-                    );
-                    if (index !== -1) {
-                        toggleEventSelection(index);
-                        // Switch to list view to allow editing
-                        viewSelect.value = 'list';
-                        viewSelect.dispatchEvent(new Event('change'));
-                    }
-                },
-                eventRender: function(event, element) {
-                    const events = JSON.parse(localStorage.getItem('events')) || [];
-                    const index = events.findIndex(e => e.name === event.title && e.date + 'T' + e.time === event.start.format());
-                    if (selectedEvents.has(index)) {
-                        element.addClass('selected');
-                    }
-                    if (lastSelectedIndex === index) {
-                        element.addClass('last-selected');
-                    }
-                }
-            });
-
-            viewSelect.addEventListener('change', function() {
-                const listView = document.querySelector('.table-container');
-                const calendarView = document.querySelector('.calendar-container');
-                
-                if (this.value === 'list') {
-                    listView.style.display = 'block';
-                    calendarView.style.display = 'none';
-                    // Re-apply sorting indicators for list view
-                    if (currentSortColumn !== null) {
-                        Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
-                            th.classList.remove('asc', 'desc');
-                            if (index === currentSortColumn) {
-                                th.classList.add(currentSortDirection);
-                            }
-                        });
-                    }
-                } else {
-                    listView.style.display = 'none';
-                    calendarView.style.display = 'block';
-                    $('#calendar').fullCalendar('render');
-                    // Remove sorting indicators for calendar view
-                    Array.from(table.tHead.rows[0].cells).forEach(th => {
-                        th.classList.remove('asc', 'desc');
-                    });
-                }
-            });
-
-            searchButton.addEventListener('click', function() {
-                const searchTerm = searchInput.value;
-                const start = startDate.value;
-                const end = endDate.value;
-                const field = searchField.value;
-
-                loadEvents(filterSelect.value, { searchTerm, start, end, field });
-            });
-
-            resetButton.addEventListener('click', function() {
-                searchInput.value = '';
-                startDate.value = '';
-                endDate.value = '';
-                searchField.value = 'all';
-                loadEvents(filterSelect.value);
-            });
-
-            // Initialize the view and load events
-            viewSelect.dispatchEvent(new Event('change'));
-            loadEvents();
+          });
+  
+          function updateCalendar(events) {
+            $("#calendar").fullCalendar("removeEvents");
+            const calendarEvents = events.map((event) => ({
+              title: event.name,
+              start: event.date + "T" + event.time,
+              allDay: false,
+              originalEvent: event,
+            }));
+            $("#calendar").fullCalendar("addEventSource", calendarEvents);
+          }
+  
+          $("#calendar").fullCalendar({
+            header: {
+              left: "prev,next today",
+              center: "title",
+              right: "month,agendaWeek,agendaDay",
+            },
+            events: function (start, end, timezone, callback) {
+              const events = JSON.parse(localStorage.getItem("events")) || [];
+              const calendarEvents = events.map((event) => ({
+                title: event.name,
+                start: event.date + "T" + event.time,
+                allDay: false,
+                originalEvent: event,
+              }));
+              callback(calendarEvents);
+            },
+            eventClick: function (calEvent, jsEvent, view) {
+              const events = JSON.parse(localStorage.getItem("events")) || [];
+              const index = events.findIndex(
+                (event) =>
+                  event.name === calEvent.title &&
+                  event.date + "T" + event.time === calEvent.start.format()
+              );
+              if (index !== -1) {
+                toggleEventSelection(index);
+                // Switch to list view to allow editing
+                viewSelect.value = "list";
+                viewSelect.dispatchEvent(new Event("change"));
+              }
+            },
+            eventRender: function (event, element) {
+              const events = JSON.parse(localStorage.getItem("events")) || [];
+              const index = events.findIndex(
+                (e) =>
+                  e.name === event.title &&
+                  e.date + "T" + e.time === event.start.format()
+              );
+              if (selectedEvents.has(index)) {
+                element.addClass("selected");
+              }
+              if (lastSelectedIndex === index) {
+                element.addClass("last-selected");
+              }
+            },
+          });
+  
+          viewSelect.addEventListener("change", function () {
+            const listView = document.querySelector(".table-container");
+            const calendarView = document.querySelector(".calendar-container");
+  
+            if (this.value === "list") {
+              listView.style.display = "block";
+              calendarView.style.display = "none";
+              // Re-apply sorting indicators for list view
+              if (currentSortColumn !== null) {
+                Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
+                  th.classList.remove("asc", "desc");
+                  if (index === currentSortColumn) {
+                    th.classList.add(currentSortDirection);
+                  }
+                });
+              }
+            } else {
+              listView.style.display = "none";
+              calendarView.style.display = "block";
+              $("#calendar").fullCalendar("render");
+              // Remove sorting indicators for calendar view
+              Array.from(table.tHead.rows[0].cells).forEach((th) => {
+                th.classList.remove("asc", "desc");
+              });
+            }
+          });
+  
+          searchButton.addEventListener("click", function () {
+            const searchTerm = searchInput.value;
+            const start = startDate.value;
+            const end = endDate.value;
+            const field = searchField.value;
+  
+            loadEvents(filterSelect.value, { searchTerm, start, end, field });
+          });
+  
+          resetButton.addEventListener("click", function () {
+            searchInput.value = "";
+            startDate.value = "";
+            endDate.value = "";
+            searchField.value = "all";
+            loadEvents(filterSelect.value);
+          });
+  
+          // Initialize the view and load events
+          viewSelect.dispatchEvent(new Event("change"));
+          loadEvents();
         });
-    </script>
-</body>
-</html>
+      </script>
+    </body>
+  </html>

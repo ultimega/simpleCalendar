@@ -5,6 +5,7 @@
 ![0.5](screenshots/0.5.png)
 ![0.6](screenshots/0.6.png)
 ![0.7](screenshots/0.7.png)
+![0.7.1](screenshots/0.7.1.png)
 ![0.8](screenshots/0.8.png)
 ![0.9](screenshots/0.9.png)
 ![1.0](screenshots/1.0.png)

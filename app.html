@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <style>
       * {
         box-sizing: border-box;
@@ -263,7 +265,6 @@
       }
     </style>
   </head>
-
   <body>
     <div class="form-container">
       <h2>Add Event</h2>
@@ -283,9 +284,9 @@
           <button type="button" id="deleteSelected">Delete Selected</button>
           <button type="button" id="exportCSV">Export as CSV</button>
           <div>
-          <label for="loadCSV">Load CSV:</label>
-          <input type="file" id="loadCSV" accept=".csv" />
-        </div>
+            <label for="loadCSV">Load CSV:</label>
+            <input type="file" id="loadCSV" accept=".csv" />
+          </div>
         </div>
 
         <div class="filter-options">
@@ -327,21 +328,29 @@
       <div class="table-container">
         <h2>Stored Events</h2>
         <div class="button-group">
-        <button id="selectAll" type="button" style="background-color: #6c5b39; color: #ffffff;">Select All</button>
+          <button
+            id="selectAll"
+            type="button"
+            style="background-color: #6c5b39; color: #ffffff"
+          >
+            Select All
+          </button>
           <button id="selectBetween" type="button">Select Between</button>
         </div>
         <table id="eventTable">
           <thead>
             <tr>
               <th></th>
-              <th onclick="sortTable(1)">Event Name</th>
-              <th onclick="sortTable(2)">Date</th>
+              <th onclick="sortTable(1)">Date</th>
+              <th onclick="sortTable(2)">Event Name</th>
               <th onclick="sortTable(3)">Time</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
-        <div id="noEventsFound">No events found matching your search criteria.</div>
+        <div id="noEventsFound">
+          No events found matching your search criteria.
+        </div>
       </div>
       <div class="calendar-container">
         <div id="calendar"></div>
@@ -370,16 +379,26 @@
         const noEventsFoundMessage = document.getElementById("noEventsFound");
         let selectedEvents = new Set();
         let lastSelectedIndex = null;
-        let currentSortColumn = null;
+        let currentSortColumn = 1; // Default sort by date
         let currentSortDirection = "asc";
 
         // Prefill date and time with current info
         const now = new Date();
         eventDateField.value = now.toISOString().split("T")[0];
         eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
-        
+
         // Set focus on the event name field
         eventNameField.focus();
+
+        function formatDate(dateString) {
+          const date = new Date(dateString);
+          return date.toLocaleDateString("en-US", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
+        }
 
         function loadEvents(filter = "all", searchParams = null) {
           const events = JSON.parse(localStorage.getItem("events")) || [];
@@ -441,8 +460,8 @@
             checkbox.onclick = () => toggleEventSelection(index, newRow);
             checkboxCell.appendChild(checkbox);
 
-            newRow.insertCell(1).textContent = event.name;
-            newRow.insertCell(2).textContent = event.date;
+            newRow.insertCell(1).textContent = formatDate(event.date);
+            newRow.insertCell(2).textContent = event.name;
             newRow.insertCell(3).textContent = event.time;
 
             if (selectedEvents.has(index)) {
@@ -455,9 +474,7 @@
           });
 
           updateCalendar(filteredEvents);
-          if (currentSortColumn !== null) {
-            sortTable(currentSortColumn, currentSortDirection);
-          }
+          sortTable(currentSortColumn, currentSortDirection);
         }
 
         function toggleEventSelection(index, element) {
@@ -521,7 +538,7 @@
           const now = new Date();
           eventDateField.value = now.toISOString().split("T")[0];
           eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
-          
+
           // Set focus back to the event name field
           eventNameField.focus();
         });
@@ -626,7 +643,9 @@
         });
 
         selectBetweenButton.addEventListener("click", function () {
-          const checkboxes = Array.from(tbody.querySelectorAll('input[type="checkbox"]'));
+          const checkboxes = Array.from(
+            tbody.querySelectorAll('input[type="checkbox"]')
+          );
           const selectedIndices = checkboxes.reduce((acc, checkbox, index) => {
             if (checkbox.checked) acc.push(index);
             return acc;
@@ -694,47 +713,45 @@
         function sortTable(column, direction = "asc") {
           const rows = Array.from(tbody.rows);
           const compare = (rowA, rowB) => {
-            const cellA = rowA.cells[column].textContent.trim();
-            const cellB = rowB.cells[column].textContent.trim();
-            return cellA.localeCompare(cellB, undefined, {
-              numeric: true,
-              sensitivity: "base",
-            });
+            let cellA = rowA.cells[column].textContent.trim();
+            let cellB = rowB.cells[column].textContent.trim();
+
+            // For date column, convert to timestamp for proper sorting
+            if (column === 1) {
+              cellA = new Date(cellA).getTime();
+              cellB = new Date(cellB).getTime();
+            }
+
+            if (cellA < cellB) return direction === "asc" ? -1 : 1;
+            if (cellA > cellB) return direction === "asc" ? 1 : -1;
+            return 0;
           };
 
-          rows.sort((rowA, rowB) => {
-            return direction === "asc"
-              ? compare(rowA, rowB)
-              : compare(rowB, rowA);
-          });
+          rows.sort(compare);
 
           tbody.append(...rows);
 
-          // Update sort indicators only for the list view
-          if (viewSelect.value === "list") {
-            Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
-              th.classList.remove("asc", "desc");
-              if (index === column) {
-                th.classList.add(direction);
-              }
-            });
-          }
+          // Update sort indicators
+          Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
+            th.classList.remove("asc", "desc");
+            if (index === column) {
+              th.classList.add(direction);
+            }
+          });
 
           currentSortColumn = column;
           currentSortDirection = direction;
         }
 
-        // Add click event listeners to table headers for sorting (only in list view)
+        // Add click event listeners to table headers for sorting
         Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
           if (index > 0) {
             // Skip the first column (checkbox column)
             th.addEventListener("click", () => {
-              if (viewSelect.value === "list") {
-                const newDirection = th.classList.contains("asc")
-                  ? "desc"
-                  : "asc";
-                sortTable(index, newDirection);
-              }
+              const newDirection = th.classList.contains("asc")
+                ? "desc"
+                : "asc";
+              sortTable(index, newDirection);
             });
           }
         });
@@ -816,10 +833,6 @@
             listView.style.display = "none";
             calendarView.style.display = "block";
             $("#calendar").fullCalendar("render");
-            // Remove sorting indicators for calendar view
-            Array.from(table.tHead.rows[0].cells).forEach((th) => {
-              th.classList.remove("asc", "desc");
-            });
           }
         });
 
@@ -840,9 +853,14 @@
           loadEvents(filterSelect.value);
         });
 
+        filterSelect.addEventListener("change", function () {
+          loadEvents(this.value);
+        });
+
         // Initialize the view and load events
         viewSelect.dispatchEvent(new Event("change"));
         loadEvents();
+        sortTable(1, "asc"); // Sort by date initially
       });
     </script>
   </body>

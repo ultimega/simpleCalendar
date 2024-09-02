@@ -124,15 +124,16 @@
       .content-container {
         flex: 1;
         margin-left: 340px;
-        padding: 20px;
+        margin-right: 10px;
+        padding: 10px;
         overflow-y: auto;
+        max-height: calc(100vh - 10px);
         background: #ffffff;
         border-radius: 15px;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
       }
 
-      .table-container,
-      .calendar-container {
+      .table-container{
         display: none;
       }
 
@@ -257,6 +258,37 @@
         margin-top: 10px;
         border-radius: 4px;
       }
+      
+      .tooltip {
+        position: relative;
+        display: inline-block;
+      }
+
+      .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .free-day {
+        background-color: #e6ffe6;
+      }
     </style>
   </head>
   <body>
@@ -326,15 +358,32 @@
             id="selectAll"
             type="button"
             style="background-color: #6c5b39; color: #ffffff"
+            class="tooltip"
           >
             Select All
+            <span class="tooltiptext">Select all visible events</span>
           </button>
-          <button id="selectBetween" type="button">Select Between</button>
+          <button id="selectBetween" type="button" class="tooltip">
+            Select Between
+            <span class="tooltiptext"
+              >Select events between two selected events</span
+            >
+          </button>
+          <button id="toggleFreeDays" type="button" class="tooltip">
+            Toggle FreeDays
+            <span class="tooltiptext">Show/Hide days without events</span>
+          </button>
         </div>
         <div id="range-controls" style="display: none">
-          <button id="prevRange">&lt; Previous</button>
+          <button id="prevRange" class="tooltip">
+            &lt; Previous
+            <span class="tooltiptext">View previous week</span>
+          </button>
           <span id="currentRange"></span>
-          <button id="nextRange">Next &gt;</button>
+          <button id="nextRange" class="tooltip">
+            Next &gt;
+            <span class="tooltiptext">View next week</span>
+          </button>
         </div>
         <table id="eventTable">
           <thead>
@@ -347,10 +396,16 @@
           </thead>
           <tbody></tbody>
         </table>
-        <div id="pagination-controls">
-          <button id="prevPage">&lt; Previous</button>
+      <div id="pagination-controls">
+          <button id="prevPage" class="tooltip">
+            &lt; Previous
+            <span class="tooltiptext">View previous page</span>
+          </button>
           <span id="pageInfo"></span>
-          <button id="nextPage">Next &gt;</button>
+          <button id="nextPage" class="tooltip">
+            Next &gt;
+            <span class="tooltiptext">View next page</span>
+          </button>
         </div>
         <div id="noEventsFound">
           No events found matching your search criteria.
@@ -394,6 +449,10 @@
         let currentRangeStart = null;
         let currentRangeEnd = null;
 
+        const toggleFreeDaysButton = document.getElementById("toggleFreeDays");
+        let showFreeDays = false;
+
+        
         // Prefill date and time with current info
         const now = new Date();
         eventDateField.value = now.toISOString().split("T")[0];
@@ -458,7 +517,7 @@
             return true;
           });
 
-          if (filteredEvents.length === 0) {
+          if (filteredEvents.length === 0 && !showFreeDays) {
             noEventsFoundMessage.style.display = "block";
           } else {
             noEventsFoundMessage.style.display = "none";
@@ -467,34 +526,69 @@
           // Sort events
           filteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+          // Generate all dates in the range
+          let allDates = [];
+          if (currentRangeStart && currentRangeEnd) {
+            let currentDate = new Date(currentRangeStart);
+            while (currentDate <= currentRangeEnd) {
+              allDates.push(new Date(currentDate));
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+          } else {
+            // If no range is set, use the dates from filtered events
+            allDates = filteredEvents.map((event) => new Date(event.date));
+          }
+
+          // Remove duplicates and sort
+          allDates = [
+            ...new Set(
+              allDates.map((date) => date.toISOString().split("T")[0])
+            ),
+          ].sort();
+
           // Pagination
           const startIndex = (page - 1) * eventsPerPage;
           const endIndex = startIndex + eventsPerPage;
-          const paginatedEvents = filteredEvents.slice(startIndex, endIndex);
+          const paginatedDates = allDates.slice(startIndex, endIndex);
 
-          paginatedEvents.forEach((event, index) => {
-            const newRow = tbody.insertRow();
-            const checkboxCell = newRow.insertCell(0);
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.onclick = () =>
-              toggleEventSelection(startIndex + index, newRow);
-            checkboxCell.appendChild(checkbox);
+          paginatedDates.forEach((date) => {
+            const eventsOnThisDay = filteredEvents.filter(
+              (event) => event.date === date
+            );
 
-            newRow.insertCell(1).textContent = formatDate(event.date);
-            newRow.insertCell(2).textContent = event.name;
-            newRow.insertCell(3).textContent = event.time;
+            if (eventsOnThisDay.length > 0) {
+              eventsOnThisDay.forEach((event, index) => {
+                const newRow = tbody.insertRow();
+                const checkboxCell = newRow.insertCell(0);
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.onclick = () =>
+                  toggleEventSelection(filteredEvents.indexOf(event), newRow);
+                checkboxCell.appendChild(checkbox);
 
-            if (selectedEvents.has(startIndex + index)) {
-              checkbox.checked = true;
-              newRow.classList.add("selected");
-            }
-            if (startIndex + index === lastSelectedIndex) {
-              newRow.classList.add("last-selected");
+                newRow.insertCell(1).textContent = formatDate(event.date);
+                newRow.insertCell(2).textContent = event.name;
+                newRow.insertCell(3).textContent = event.time;
+
+                if (selectedEvents.has(filteredEvents.indexOf(event))) {
+                  checkbox.checked = true;
+                  newRow.classList.add("selected");
+                }
+                if (filteredEvents.indexOf(event) === lastSelectedIndex) {
+                  newRow.classList.add("last-selected");
+                }
+              });
+            } else if (showFreeDays) {
+              const newRow = tbody.insertRow();
+              newRow.classList.add("free-day");
+              newRow.insertCell(0);
+              newRow.insertCell(1).textContent = formatDate(date);
+              newRow.insertCell(2).textContent = "Free Day";
+              newRow.insertCell(3);
             }
           });
 
-          updatePaginationControls(filteredEvents.length, page);
+          updatePaginationControls(allDates.length, page);
           sortTable(currentSortColumn, currentSortDirection);
         }
 
@@ -536,7 +630,11 @@
           }
         }
 
-        form.addEventListener("submit", function (e) {
+        toggleFreeDaysButton.addEventListener("click", function () {
+          showFreeDays = !showFreeDays;
+          loadEvents(filterSelect.value, null, currentPage);
+        });
+ form.addEventListener("submit", function (e) {
           e.preventDefault();
 
           const eventName = eventNameField.value;

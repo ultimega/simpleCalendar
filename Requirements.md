@@ -9,9 +9,9 @@
   - 
 
 - Event Name placeholder to be overwritten : "Event Name". no label : Done
-- In the list view, shift time column to 2nd column
+- In the list view, shift time column to 2nd column. : Done (affects Calendar view by current code logic)
 - Delete grayed out till selection done
-- For the Event Container,smaller well spaced buttons : Done
+- For the Event Container, smaller well spaced buttons : Done
 - Search and Filter "All Fields" should be less techy themed . Changed to "All" : Done
   
 - In the Calendar View, a date's events&time should be compiled into that record, onelinee
@@ -34,3 +34,4 @@
 - after filtering, wrong event is updated after selection done
 - After using calendar view you are limited to only that range of results even in the list view 
   - QUICK-FIX: Refresh the page to obtain the default list view
+- Attempted record highlighting for visual feedback not on point . needs update

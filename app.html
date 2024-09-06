@@ -113,13 +113,20 @@
       }
 
       #deleteSelected {
-        background-color: #b23340;
-      }
-
-      #deleteSelected:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    #deleteSelected:hover:not(:disabled) {
         background-color: #c82333;
-      }
-
+    }
+    
+    #deleteSelected:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+    
       input[type="file"] {
         background-color: #6c757d;
       }
@@ -501,7 +508,7 @@
           <input type="time" id="eventTime" required />
           <div class="button-group">
             <button type="submit" id="submit">Add</button>
-            <button type="button" id="deleteSelected">Delete</button>
+            <button type="button" id="deleteSelected" disabled>Delete</button>
           </div>
         </form>
       </div>
@@ -588,7 +595,8 @@
               >
                 <div style="overflow: hidden; text-overflow: ellipsis">
                   <span title="`selectDynamic-yet to be implemented`">
-                    `selectDynamic-yet to be implemented`</span>
+                    `selectDynamic-yet to be implemented`</span
+                  >
                 </div>
               </th>
               <th onclick="sortTable(1)">Date</th>
@@ -670,6 +678,12 @@
             month: "long",
             year: "numeric",
           });
+        }
+
+        //Implemented to achieve an inactive Delete button -->
+        function updateDeleteButtonState() {
+          const deleteButton = document.getElementById("deleteSelected");
+          deleteButton.disabled = selectedEvents.size === 0;
         }
 
         function loadEvents(filter = "all", searchParams = null, page = 1) {
@@ -791,6 +805,7 @@
 
           updatePaginationControls(allDates.length, page);
           sortTable(currentSortColumn, currentSortDirection);
+          updateDeleteButtonState();
         }
 
         function updatePaginationControls(totalEvents, currentPage) {
@@ -829,6 +844,7 @@
             eventTimeField.value = event.time;
             editIndexField.value = index;
           }
+          updateDeleteButtonState();
         }
 
         toggleFreeDaysButton.addEventListener("click", function () {
@@ -919,6 +935,36 @@
                 }
               }
 
+              document
+                .getElementById("deleteSelected")
+                .addEventListener("click", function () {
+                  if (selectedEvents.size > 0) {
+                    const events =
+                      JSON.parse(localStorage.getItem("events")) || [];
+                    const newEvents = events.filter(
+                      (_, index) => !selectedEvents.has(index)
+                    );
+                    localStorage.setItem("events", JSON.stringify(newEvents));
+                    loadEvents(filterSelect.value, null, 1);
+                    selectedEvents.clear();
+                    lastSelectedIndex = null;
+                    form.reset();
+                    editIndexField.value = "";
+                    // Prefill date and time with current info
+                    const now = new Date();
+                    eventDateField.value = now.toISOString().split("T")[0];
+                    eventTimeField.value = now
+                      .toTimeString()
+                      .split(" ")[0]
+                      .slice(0, 5);
+                    // Set focus back to the event name field
+                    eventNameField.focus();
+                    updateDeleteButtonState();
+                  } else {
+                    alert("Please select at least one event to delete.");
+                  }
+                });
+
               localStorage.setItem("events", JSON.stringify(events));
 
               loadEvents(filterSelect.value, null, 1);
@@ -970,6 +1016,7 @@
             eventDateField.value = now.toISOString().split("T")[0];
             eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
           }
+          updateDeleteButtonState();
         });
 
         selectBetweenButton.addEventListener("click", function () {
@@ -1012,6 +1059,7 @@
             eventTimeField.value = event.time;
             editIndexField.value = lastSelectedIndex;
           }
+          updateDeleteButtonState();
         });
 
         document

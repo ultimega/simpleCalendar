@@ -513,7 +513,7 @@
           <input type="date" id="startDate" placeholder="Start Date" />
           <input type="date" id="endDate" placeholder="End Date" />
           <select id="searchField">
-            <option value="all">All Fields</option>
+            <option value="all">All</option>
             <option value="name">Name</option>
             <option value="date">Date</option>
             <option value="time">Time</option>
@@ -582,11 +582,18 @@
         <table id="eventTable">
           <thead>
             <tr>
-              <th onclick="selectDynamic()" style="">`selectDynamic`</th>
-              <!-- Yet to implement selectDynamic with Checkbox as header -->
+              <th
+                onclick="selectDynamic(_)"
+                style="max-width: 15px; white-space: nowrap"
+              >
+                <div style="overflow: hidden; text-overflow: ellipsis">
+                  <span title="`selectDynamic-yet to be implemented`">
+                    `selectDynamic-yet to be implemented`</span>
+                </div>
+              </th>
               <th onclick="sortTable(1)">Date</th>
-              <th onclick="sortTable(2)">Event Name</th>
-              <th onclick="sortTable(3)">Time</th>
+              <th onclick="sortTable(2)">Time</th>
+              <th onclick="sortTable(3)">Event Name</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -761,8 +768,8 @@
                 checkboxCell.appendChild(checkbox);
 
                 newRow.insertCell(1).textContent = formatDate(event.date);
-                newRow.insertCell(2).textContent = event.name;
-                newRow.insertCell(3).textContent = event.time;
+                newRow.insertCell(2).textContent = event.time;
+                newRow.insertCell(3).textContent = event.name;
 
                 if (selectedEvents.has(filteredEvents.indexOf(event))) {
                   checkbox.checked = true;
@@ -1045,6 +1052,10 @@
             if (column === 1) {
               cellA = new Date(cellA).getTime();
               cellB = new Date(cellB).getTime();
+            } else if (column === 2) {
+              // Add time sorting logic if needed
+              cellA = new Date(`1970-01-01T${cellA}`).getTime();
+              cellB = new Date(`1970-01-01T${cellB}`).getTime();
             }
 
             if (cellA < cellB) return direction === "asc" ? -1 : 1;

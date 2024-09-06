@@ -8,11 +8,11 @@
     - Delete Seleted changed to "Delete"
   - 
 
-- Event Name placeholder to be overwritten : "Event Name". no label
+- Event Name placeholder to be overwritten : "Event Name". no label : Done
 - In the list view, shift time column to 2nd column
 - Delete grayed out till selection done
-- For the Event Container,smaller buttons
-- Search and Filter "All Fields" should be less techy themed
+- For the Event Container,smaller well spaced buttons : Done
+- Search and Filter "All Fields" should be less techy themed . Changed to "All" : Done
   
 - In the Calendar View, a date's events&time should be compiled into that record, onelinee
 - 
@@ -26,7 +26,7 @@
 
 - Select ALl and select between should work as one Big checkbox at the select column header
 
- - 
+- Good interaction Feedback checks and implementation
 - One Navigation Style, Scrolling(ListView) and Pagination(Calendar View)
 - add show : current events only, past events only, future events only
 

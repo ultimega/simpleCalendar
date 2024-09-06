@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interactive Calendar App</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <style>
       * {
         box-sizing: border-box;
@@ -19,14 +17,15 @@
         display: flex;
         height: 100vh;
         margin: 0;
-        background: linear-gradient(135deg, #e8f0ff, #d1e7ff);
+        background: linear-gradient(135deg, #082d71, #d1e7ff);
         overflow: hidden;
       }
 
       .form-container {
-        width: 320px;
-        background-color: #fff;
-        padding: 20px;
+        width: 100%;
+        max-width: 320px;
+        background-color: #cb9647;
+        padding: 5px;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         position: fixed;
         top: 0;
@@ -109,8 +108,12 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
+      #submit:hover {
+        background-color: #236332;
+      }
+
       #deleteSelected {
-        background-color: #dc3545;
+        background-color: #b23340;
       }
 
       #deleteSelected:hover {
@@ -133,7 +136,7 @@
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
       }
 
-      .table-container{
+      .table-container {
         display: none;
       }
 
@@ -258,7 +261,7 @@
         margin-top: 10px;
         border-radius: 4px;
       }
-      
+
       .tooltip {
         position: relative;
         display: inline-block;
@@ -289,50 +292,188 @@
       .free-day {
         background-color: #e6ffe6;
       }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #e8f0ff, #d1e7ff);
+        overflow: hidden;
+      }
+
+      .form-container {
+        width: 340px;
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        border-radius: 10px;
+        transform: translateZ(0);
+      }
+
+      .control-section {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .control-section h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 18px;
+        color: #333;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 5px;
+      }
+
+      .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .button-group button,
+      .button-group input[type="file"] {
+        flex: 1 0 calc(50% - 5px);
+      }
+
+      #deleteSelected {
+        background-color: #dc3545;
+      }
+
+      #deleteSelected:hover {
+        background-color: #c82333;
+      }
+
+      .search-filter-container {
+        margin-top: 15px;
+      }
+
+      .search-filter-container input,
+      .search-filter-container select {
+        margin-bottom: 10px;
+      }
+      .search-filter-container .button-group {
+        justify-content: flex-start;
+      }
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+      #noEventsFound {
+        display: none;
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 4px;
+      }
+
+      .tooltip {
+        position: relative;
+        display: inline-block;
+      }
+
+      .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .free-day {
+        background-color: #e6ffe6;
+      }
+
+      .view-options {
+        margin-top: 20px;
+      }
+      .view-options,
+      .filter-options {
+        display: flex;
+        justify-content: space-between;
+      }
+      .view-options button,
+      .filter-options button {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #007bff;
+        color: #fff;
+        transition: background-color 0.3s;
+      }
+      .view-options button:hover,
+      .filter-options button:hover {
+        background-color: #0056b3;
+      }
+      .view-options button:disabled,
+      .filter-options button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+      .view-options button:disabled:hover,
+      .filter-options button:disabled:hover {
+        background-color: #ccc;
+      }
     </style>
   </head>
   <body>
     <div class="form-container">
-      <h2>Add Event</h2>
-      <form id="eventForm">
-        <input type="hidden" id="editIndex" />
-        <label for="eventName">Event Name:</label>
-        <input type="text" id="eventName" required />
+      <div class="control-section">
+        <h3>Input</h3>
+        <form id="eventForm">
+          <input type="hidden" id="editIndex" />
+          <label for="eventName">Event Name:</label>
+          <input type="text" id="eventName" required />
 
-        <label for="eventDate">Date:</label>
-        <input type="date" id="eventDate" required />
+          <label for="eventDate">Date:</label>
+          <input type="date" id="eventDate" required />
 
-        <label for="eventTime">Time:</label>
-        <input type="time" id="eventTime" required />
+          <label for="eventTime">Time:</label>
+          <input type="time" id="eventTime" required />
 
-        <div class="button-group">
-          <button type="submit">Add / Update Event</button>
-          <button type="button" id="deleteSelected">Delete Selected</button>
-          <button type="button" id="exportCSV">Export as CSV</button>
-          <div>
-            <label for="loadCSV">Load CSV:</label>
-            <input type="file" id="loadCSV" accept=".csv" />
+          <div class="button-group">
+            <button type="submit" id="submit">Add</button>
+            <button type="button" id="deleteSelected">Delete</button>
           </div>
-        </div>
+        </form>
+      </div>
 
-        <div class="filter-options">
-          <label for="filterSelect">Show:</label>
-          <select id="filterSelect">
-            <option value="all">All Events</option>
-            <option value="week">Events This Week</option>
-          </select>
-        </div>
-
-        <div class="view-options">
-          <label for="viewSelect">View:</label>
-          <select id="viewSelect">
-            <option value="list">List View</option>
-            <option value="range">Range View</option>
-          </select>
-        </div>
-
+      <div class="control-section">
+        <h3>Read</h3>
         <div class="search-filter-container">
-          <h3>Search & Filter</h3>
           <input type="text" id="searchInput" placeholder="Search events..." />
           <input type="date" id="startDate" placeholder="Start Date" />
           <input type="date" id="endDate" placeholder="End Date" />
@@ -347,7 +488,46 @@
             <button type="button" id="resetButton">Reset</button>
           </div>
         </div>
-      </form>
+        <div class="view-options">
+          <!-- <label for="viewSelect">View:</label> -->
+          <select id="viewSelect">
+            <option value="list">List View</option>
+            <option value="range">Calendar View</option>
+          </select>
+        </div>
+        <div class="filter-options">
+          <!-- <label for="filterSelect">Show:</label> -->
+          <select id="filterSelect">
+            <option value="all">All Events</option>
+            <option value="week">Events This Week</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>Batch</h3>
+        <div class="button-group">
+          <button id="selectAll" type="button" class="tooltip">
+            Select All
+            <span class="tooltiptext">Select all visible events</span>
+          </button>
+          <button id="selectBetween" type="button" class="tooltip">
+            Select Between
+            <span class="tooltiptext"
+              >Select events between two selected events</span
+            >
+          </button>
+          <button id="toggleFreeDays" type="button" class="tooltip">
+            Toggle FreeDays
+            <span class="tooltiptext">Show/Hide days without events</span>
+          </button>
+          <button type="button" id="exportCSV">Export as CSV</button>
+          <div>
+            <label for="loadCSV">Load CSV:</label>
+            <input type="file" id="loadCSV" accept=".csv" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="content-container">
@@ -396,7 +576,7 @@
           </thead>
           <tbody></tbody>
         </table>
-      <div id="pagination-controls">
+        <div id="pagination-controls">
           <button id="prevPage" class="tooltip">
             &lt; Previous
             <span class="tooltiptext">View previous page</span>
@@ -452,7 +632,6 @@
         const toggleFreeDaysButton = document.getElementById("toggleFreeDays");
         let showFreeDays = false;
 
-        
         // Prefill date and time with current info
         const now = new Date();
         eventDateField.value = now.toISOString().split("T")[0];
@@ -634,7 +813,7 @@
           showFreeDays = !showFreeDays;
           loadEvents(filterSelect.value, null, currentPage);
         });
- form.addEventListener("submit", function (e) {
+        form.addEventListener("submit", function (e) {
           e.preventDefault();
 
           const eventName = eventNameField.value;

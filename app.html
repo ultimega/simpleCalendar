@@ -130,10 +130,20 @@
         margin-right: 10px;
         padding: 10px;
         overflow-y: auto;
-        max-height: calc(100vh - 10px);
+        height: 100%;
+        max-height: calc(100vh - 20px);
         background: #ffffff;
         border-radius: 15px;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      @media (max-width: 768px) {
+        .content-container {
+          margin-left: 10px;
+          margin-right: 10px;
+        }
       }
 
       .table-container {
@@ -447,6 +457,31 @@
       .filter-options button:disabled:hover {
         background-color: #ccc;
       }
+
+      @media screen and (max-width: 768px) {
+        #nextPage,
+        #prevPage {
+          margin: 1vw;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media screen and (max-width: 480px) {
+        #nextPage,
+        #prevPage {
+          margin: 0.5vw;
+          font-size: 0.8rem;
+        }
+      }
+
+      #nextPage,
+      #prevPage,
+      #prevRange,
+      #nextRange {
+        margin: 2vw;
+        font-size: 1rem;
+        border-radius: 10px;
+      }
     </style>
   </head>
   <body>
@@ -532,43 +567,23 @@
 
     <div class="content-container">
       <div class="table-container">
-        <h2>Stored Events</h2>
-        <div class="button-group">
-          <button
-            id="selectAll"
-            type="button"
-            style="background-color: #6c5b39; color: #ffffff"
-            class="tooltip"
-          >
-            Select All
-            <span class="tooltiptext">Select all visible events</span>
-          </button>
-          <button id="selectBetween" type="button" class="tooltip">
-            Select Between
-            <span class="tooltiptext"
-              >Select events between two selected events</span
-            >
-          </button>
-          <button id="toggleFreeDays" type="button" class="tooltip">
-            Toggle FreeDays
-            <span class="tooltiptext">Show/Hide days without events</span>
-          </button>
-        </div>
+        <h5 style="text-align: right; font-family: 'Arial', sans-serif"></h5>
         <div id="range-controls" style="display: none">
           <button id="prevRange" class="tooltip">
-            &lt; Previous
+            &lt;
             <span class="tooltiptext">View previous week</span>
           </button>
           <span id="currentRange"></span>
           <button id="nextRange" class="tooltip">
-            Next &gt;
+            &gt;
             <span class="tooltiptext">View next week</span>
           </button>
         </div>
         <table id="eventTable">
           <thead>
             <tr>
-              <th></th>
+              <th onclick="selectDynamic()" style="">`selectDynamic`</th>
+              <!-- Yet to implement selectDynamic with Checkbox as header -->
               <th onclick="sortTable(1)">Date</th>
               <th onclick="sortTable(2)">Event Name</th>
               <th onclick="sortTable(3)">Time</th>
@@ -578,12 +593,12 @@
         </table>
         <div id="pagination-controls">
           <button id="prevPage" class="tooltip">
-            &lt; Previous
+            &lt;
             <span class="tooltiptext">View previous page</span>
           </button>
           <span id="pageInfo"></span>
           <button id="nextPage" class="tooltip">
-            Next &gt;
+            &gt;
             <span class="tooltiptext">View next page</span>
           </button>
         </div>

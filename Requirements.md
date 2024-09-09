@@ -38,7 +38,19 @@ CRITICAL BUG CAUGHT AND Fixed - took majority of dev time:
 - add show : current events only, past events only, future events only
 
 ## DOING
+DONE- Indpendent Calendar view (on new branch) with same function defnitions and capabilites.
+
+DONE - In the Calendar View, Events should be shown only annually per the respective month, on top. Dropdowns can be used. so like a dropdown to select the year and another to select the month. then the pagination shifts the weeks.
+
+- Providing interactive Styling for the calendar view
+  - 
+  - Calendar grid to be made vertical before 
+  - 
+  we proceed
+  
 - In the Calendar View, a date's events&time should be compiled into that record, oneline
+  
+
 
 ## BUGS
 - after filtering, wrong event is updated after selection done

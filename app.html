@@ -113,13 +113,20 @@
       }
 
       #deleteSelected {
-        background-color: #b23340;
-      }
-
-      #deleteSelected:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    #deleteSelected:hover:not(:disabled) {
         background-color: #c82333;
-      }
-
+    }
+    
+    #deleteSelected:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+    
       input[type="file"] {
         background-color: #6c757d;
       }
@@ -500,8 +507,8 @@
           <input type="date" id="eventDate" required />
           <input type="time" id="eventTime" required />
           <div class="button-group">
-            <button type="submit" id="submit">Add</button>
-            <button type="button" id="deleteSelected">Delete</button>
+            <button type="submit" id="submit">Add / Update</button>
+            <button type="button" id="deleteSelected" disabled>Delete</button>
           </div>
         </form>
       </div>
@@ -588,7 +595,8 @@
               >
                 <div style="overflow: hidden; text-overflow: ellipsis">
                   <span title="`selectDynamic-yet to be implemented`">
-                    `selectDynamic-yet to be implemented`</span>
+                    `selectDynamic-yet to be implemented`</span
+                  >
                 </div>
               </th>
               <th onclick="sortTable(1)">Date</th>
@@ -614,6 +622,7 @@
         </div>
       </div>
     </div>
+
 
     <script>
       document.addEventListener("DOMContentLoaded", (event) => {
@@ -650,18 +659,18 @@
         let eventsPerPage = 10;
         let currentRangeStart = null;
         let currentRangeEnd = null;
-
+      
         const toggleFreeDaysButton = document.getElementById("toggleFreeDays");
         let showFreeDays = false;
-
+      
         // Prefill date and time with current info
         const now = new Date();
         eventDateField.value = now.toISOString().split("T")[0];
         eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
-
+      
         // Set focus on the event name field
         eventNameField.focus();
-
+      
         function formatDate(dateString) {
           const date = new Date(dateString);
           return date.toLocaleDateString("en-US", {
@@ -671,23 +680,28 @@
             year: "numeric",
           });
         }
-
+      
+        function updateDeleteButtonState() {
+          const deleteButton = document.getElementById("deleteSelected");
+          deleteButton.disabled = selectedEvents.size === 0;
+        }
+      
         function loadEvents(filter = "all", searchParams = null, page = 1) {
           const events = JSON.parse(localStorage.getItem("events")) || [];
           tbody.innerHTML = "";
-
+      
           const filteredEvents = events.filter((event) => {
             if (searchParams) {
               const { searchTerm, start, end, field } = searchParams;
               const eventDate = new Date(event.date);
-
+      
               // Check date range
               if (start && end) {
                 if (eventDate < new Date(start) || eventDate > new Date(end)) {
                   return false;
                 }
               }
-
+      
               // Check search term
               if (searchTerm) {
                 if (field === "all") {
@@ -701,7 +715,7 @@
                 }
               }
             }
-
+      
             // Apply existing filter
             if (filter === "week") {
               const today = new Date();
@@ -714,19 +728,19 @@
               const eventDate = new Date(event.date);
               return eventDate >= startOfWeek && eventDate <= endOfWeek;
             }
-
+      
             return true;
           });
-
+      
           if (filteredEvents.length === 0 && !showFreeDays) {
             noEventsFoundMessage.style.display = "block";
           } else {
             noEventsFoundMessage.style.display = "none";
           }
-
+      
           // Sort events
           filteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
-
+      
           // Generate all dates in the range
           let allDates = [];
           if (currentRangeStart && currentRangeEnd) {
@@ -739,24 +753,22 @@
             // If no range is set, use the dates from filtered events
             allDates = filteredEvents.map((event) => new Date(event.date));
           }
-
+      
           // Remove duplicates and sort
           allDates = [
-            ...new Set(
-              allDates.map((date) => date.toISOString().split("T")[0])
-            ),
+            ...new Set(allDates.map((date) => date.toISOString().split("T")[0])),
           ].sort();
-
+      
           // Pagination
           const startIndex = (page - 1) * eventsPerPage;
           const endIndex = startIndex + eventsPerPage;
           const paginatedDates = allDates.slice(startIndex, endIndex);
-
+      
           paginatedDates.forEach((date) => {
             const eventsOnThisDay = filteredEvents.filter(
               (event) => event.date === date
             );
-
+      
             if (eventsOnThisDay.length > 0) {
               eventsOnThisDay.forEach((event, index) => {
                 const newRow = tbody.insertRow();
@@ -764,18 +776,18 @@
                 const checkbox = document.createElement("input");
                 checkbox.type = "checkbox";
                 checkbox.onclick = () =>
-                  toggleEventSelection(filteredEvents.indexOf(event), newRow);
+                  toggleEventSelection(events.indexOf(event), newRow);
                 checkboxCell.appendChild(checkbox);
-
+      
                 newRow.insertCell(1).textContent = formatDate(event.date);
                 newRow.insertCell(2).textContent = event.time;
                 newRow.insertCell(3).textContent = event.name;
-
-                if (selectedEvents.has(filteredEvents.indexOf(event))) {
+      
+                if (selectedEvents.has(events.indexOf(event))) {
                   checkbox.checked = true;
                   newRow.classList.add("selected");
                 }
-                if (filteredEvents.indexOf(event) === lastSelectedIndex) {
+                if (events.indexOf(event) === lastSelectedIndex) {
                   newRow.classList.add("last-selected");
                 }
               });
@@ -788,18 +800,19 @@
               newRow.insertCell(3);
             }
           });
-
+      
           updatePaginationControls(allDates.length, page);
           sortTable(currentSortColumn, currentSortDirection);
+          updateDeleteButtonState();
         }
-
+      
         function updatePaginationControls(totalEvents, currentPage) {
           const totalPages = Math.ceil(totalEvents / eventsPerPage);
           pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
           prevPageButton.disabled = currentPage === 1;
           nextPageButton.disabled = currentPage === totalPages;
         }
-
+      
         function toggleEventSelection(index, element) {
           if (selectedEvents.has(index)) {
             selectedEvents.delete(index);
@@ -808,18 +821,19 @@
             selectedEvents.add(index);
             element.classList.add("selected");
           }
-
+      
           // Update last selected
           if (lastSelectedIndex !== null) {
-            const lastSelectedRow =
-              tbody.rows[lastSelectedIndex % eventsPerPage];
+            const lastSelectedRow = Array.from(tbody.rows).find(
+              (row) => row.classList.contains("last-selected")
+            );
             if (lastSelectedRow) {
               lastSelectedRow.classList.remove("last-selected");
             }
           }
           lastSelectedIndex = index;
           element.classList.add("last-selected");
-
+      
           // Prefill form with last selected item
           const events = JSON.parse(localStorage.getItem("events")) || [];
           const event = events[index];
@@ -829,22 +843,24 @@
             eventTimeField.value = event.time;
             editIndexField.value = index;
           }
+          updateDeleteButtonState();
         }
-
+      
         toggleFreeDaysButton.addEventListener("click", function () {
           showFreeDays = !showFreeDays;
           loadEvents(filterSelect.value, null, currentPage);
         });
+      
         form.addEventListener("submit", function (e) {
           e.preventDefault();
-
+      
           const eventName = eventNameField.value;
           const eventDate = eventDateField.value;
           const eventTime = eventTimeField.value;
           const editIndex = editIndexField.value;
-
+      
           const events = JSON.parse(localStorage.getItem("events")) || [];
-
+      
           if (editIndex === "") {
             events.push({ name: eventName, date: eventDate, time: eventTime });
           } else {
@@ -854,85 +870,80 @@
               time: eventTime,
             };
           }
-
+      
           localStorage.setItem("events", JSON.stringify(events));
           loadEvents(filterSelect.value, null, currentPage);
           form.reset();
           editIndexField.value = "";
           selectedEvents.clear();
           lastSelectedIndex = null;
-
+      
           // Prefill date and time with current info
           const now = new Date();
           eventDateField.value = now.toISOString().split("T")[0];
           eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
-
+      
           // Set focus back to the event name field
           eventNameField.focus();
         });
-
-        document
-          .getElementById("exportCSV")
-          .addEventListener("click", function () {
-            const events = JSON.parse(localStorage.getItem("events")) || [];
-            let csvContent =
-              "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
-
-            events.forEach((event) => {
-              const row = `${event.name},${event.date},${event.time}`;
-              csvContent += row + "\n";
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "events.csv");
-            document.body.appendChild(link);
-
-            link.click();
-            document.body.removeChild(link);
+      
+        document.getElementById("exportCSV").addEventListener("click", function () {
+          const events = JSON.parse(localStorage.getItem("events")) || [];
+          let csvContent = "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
+      
+          events.forEach((event) => {
+            const row = `${event.name},${event.date},${event.time}`;
+            csvContent += row + "\n";
           });
-
-        document
-          .getElementById("loadCSV")
-          .addEventListener("change", function (event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-              const content = e.target.result;
-              const lines = content.split("\n");
-
-              localStorage.removeItem("events");
-
-              const events = [];
-
-              for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (line) {
-                  const [name, date, time] = line.split(",");
-                  events.push({
-                    name: name.trim(),
-                    date: date.trim(),
-                    time: time.trim(),
-                  });
-                }
+      
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", "events.csv");
+          document.body.appendChild(link);
+      
+          link.click();
+          document.body.removeChild(link);
+        });
+      
+        document.getElementById("loadCSV").addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+      
+          reader.onload = function (e) {
+            const content = e.target.result;
+            const lines = content.split("\n");
+      
+            localStorage.removeItem("events");
+      
+            const events = [];
+      
+            for (let i = 1; i < lines.length; i++) {
+              const line = lines[i].trim();
+              if (line) {
+                const [name, date, time] = line.split(",");
+                events.push({
+                  name: name.trim(),
+                  date: date.trim(),
+                  time: time.trim(),
+                });
               }
-
-              localStorage.setItem("events", JSON.stringify(events));
-
-              loadEvents(filterSelect.value, null, 1);
-
-              event.target.value = "";
-            };
-
-            reader.readAsText(file);
-          });
-
+            }
+      
+            localStorage.setItem("events", JSON.stringify(events));
+      
+            loadEvents(filterSelect.value, null, 1);
+      
+            event.target.value = "";
+          };
+      
+          reader.readAsText(file);
+        });
+      
         selectAllButton.addEventListener("click", function () {
           const checkboxes = tbody.querySelectorAll('input[type="checkbox"]');
           const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
-
+      
           checkboxes.forEach((checkbox, index) => {
             const globalIndex = (currentPage - 1) * eventsPerPage + index;
             checkbox.checked = !allChecked;
@@ -945,11 +956,10 @@
               row.classList.remove("selected");
             }
           });
-
+      
           if (selectedEvents.size > 0) {
             lastSelectedIndex = Math.max(...selectedEvents);
-            const lastSelectedRow =
-              tbody.rows[lastSelectedIndex % eventsPerPage];
+            const lastSelectedRow = tbody.rows[lastSelectedIndex % eventsPerPage];
             if (lastSelectedRow) {
               lastSelectedRow.classList.add("last-selected");
             }
@@ -970,8 +980,9 @@
             eventDateField.value = now.toISOString().split("T")[0];
             eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
           }
+          updateDeleteButtonState();
         });
-
+      
         selectBetweenButton.addEventListener("click", function () {
           const checkboxes = Array.from(
             tbody.querySelectorAll('input[type="checkbox"]')
@@ -981,14 +992,14 @@
               acc.push((currentPage - 1) * eventsPerPage + index);
             return acc;
           }, []);
-
+      
           if (selectedIndices.length !== 2) {
             alert("Please select exactly two events to select between.");
             return;
           }
-
+      
           const [start, end] = selectedIndices.sort((a, b) => a - b);
-
+      
           for (let i = start; i <= end; i++) {
             selectedEvents.add(i);
             const rowIndex = i % eventsPerPage;
@@ -997,13 +1008,13 @@
               checkboxes[rowIndex].closest("tr").classList.add("selected");
             }
           }
-
+      
           lastSelectedIndex = end;
           const lastSelectedRow = tbody.rows[lastSelectedIndex % eventsPerPage];
           if (lastSelectedRow) {
             lastSelectedRow.classList.add("last-selected");
           }
-
+      
           const events = JSON.parse(localStorage.getItem("events")) || [];
           const event = events[lastSelectedIndex];
           if (event) {
@@ -1012,8 +1023,9 @@
             eventTimeField.value = event.time;
             editIndexField.value = lastSelectedIndex;
           }
+          updateDeleteButtonState();
         });
-
+      
         document
           .getElementById("deleteSelected")
           .addEventListener("click", function () {
@@ -1037,10 +1049,13 @@
                 .slice(0, 5);
               // Set focus back to the event name field
               eventNameField.focus();
+              updateDeleteButtonState();
             } else {
               alert("Please select at least one event to delete.");
             }
           });
+
+        // ... (keep other existing event listeners) ...
 
         function sortTable(column, direction = "asc") {
           const rows = Array.from(tbody.rows);
@@ -1153,32 +1168,6 @@
           );
           updateRangeView();
         }
-
-        function updateRangeView() {
-          currentRangeSpan.textContent = `${formatDate(
-            currentRangeStart
-          )} - ${formatDate(currentRangeEnd)}`;
-          loadEvents(
-            filterSelect.value,
-            {
-              start: currentRangeStart.toISOString().split("T")[0],
-              end: currentRangeEnd.toISOString().split("T")[0],
-            },
-            1
-          );
-        }
-
-        prevRangeButton.addEventListener("click", function () {
-          currentRangeStart.setDate(currentRangeStart.getDate() - 7);
-          currentRangeEnd.setDate(currentRangeEnd.getDate() - 7);
-          updateRangeView();
-        });
-
-        nextRangeButton.addEventListener("click", function () {
-          currentRangeStart.setDate(currentRangeStart.getDate() + 7);
-          currentRangeEnd.setDate(currentRangeEnd.getDate() + 7);
-          updateRangeView();
-        });
 
         // Initialize the view and load events
         viewSelect.dispatchEvent(new Event("change"));

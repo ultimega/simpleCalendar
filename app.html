@@ -17,8 +17,7 @@
         display: flex;
         min-height: 100vh;
         margin: 0;
-        background: linear-gradient(135deg, #28937B, #93285D);
-        padding: 8px;
+        padding: 0px;
         overflow: hidden;
       }
 
@@ -34,10 +33,10 @@
       }
 
       .form-container {
-        width: 35%;
+        width: 43%;
         max-width: 400px;
-        background-color: #ffffff;
-        padding: 15px;
+        background-color: #cecece;
+        padding: 5px;
         box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
         z-index: 1;
         transform: translateZ(20px);
@@ -45,6 +44,8 @@
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+        margin-right: 1px;
+
       }
 
       .form-container:hover {
@@ -58,8 +59,8 @@
         padding: 20px;
         overflow-y: auto;
         height: 100vh;
-        background: #ffffff;
-        border-radius: 15px;
+        background: #cecece;
+        border-radius: 0px;
       }
 
       h2,
@@ -76,12 +77,12 @@
       .control-section {
         background-color: #f8f9fa;
         border-radius: 8px;
-        padding: 20px;
+        padding: 10px 15px 2px 10px;
         margin-bottom: 20px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         transform: translateZ(10px);
         transition: transform 0.3s ease;
-        border: 1px solid #93285D;
+        border: 1px solid #2d2664;
       }
 
       .control-section:hover {
@@ -90,18 +91,11 @@
 
       .control-section h3 {
         margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 18px;
+        margin-bottom: 10px;
+        font-size: 16px;
         color: #333;
-        border-bottom: 2px solid #e0e0e0;
-        padding-bottom: 5px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        color: #333;
+        border-bottom: 0.5px solid #e0e0e0;
+        padding-bottom: 0.5px;
       }
 
       input,
@@ -121,20 +115,22 @@
       select:focus {
         outline: none;
         transform: scale(1.02);
-        box-shadow: 0 0 10px rgba(40, 147, 123, 0.5);
+        box-shadow: 0 0 10px rgba(107, 93, 162, 0.5);
       }
 
       .button-group {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 15px;
+        gap: 8px;
+        margin-top: 0px;
+        margin-bottom: 10px;
       }
 
       button,
       input[type="file"] {
         padding: 12px;
-        background-color: #28937B;
+
+        background-color:#2d2664;
         color: white;
         border: none;
         border-radius: 8px;
@@ -148,13 +144,13 @@
 
       button:hover,
       input[type="file"]:hover {
-        background-color: #421C67;
+        background-color:#655DA2;
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
       }
 
       #submit:hover {
-        background-color: #93285D;
+        background-color: #3f994c;
       }
 
       button:active,
@@ -170,11 +166,11 @@
       }
 
       #deleteSelected {
-        background-color: #93285D;
+        background-color: #721c24 ;
       }
 
       #deleteSelected:hover:not(:disabled) {
-        background-color: #421C67;
+        background-color: #e20909;
       }
 
       table {
@@ -191,11 +187,12 @@
       td {
         padding: 12px;
         text-align: left;
-        border-bottom: 1px solid #93285D;
+        border-bottom: 1px solid #655DA2;
       }
 
       th {
-        background-color: #28937B;
+
+        background-color:#2d2664;
         color: white;
         cursor: pointer;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
@@ -203,7 +200,8 @@
       }
 
       th:hover {
-        background-color: #421C67;
+
+        background-color:#2d2664e2;
       }
 
       th::after {
@@ -253,6 +251,10 @@
         margin-bottom: 15px;
         flex-wrap: wrap;
         gap: 10px;
+      }
+
+      .table-container{
+        background-color:#ffffff
       }
 
       #yearSelect,
@@ -384,8 +386,8 @@
       }
 
       .search-filter-container {
-        margin-top: 20px;
-        padding: 15px;
+        margin-top: 0px;
+        padding: 0px 0px 5px 5px;
         background-color: #f8f9fa;
         border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -424,7 +426,7 @@
       .filter-options {
         display: flex;
         justify-content: space-between;
-        margin-top: 20px;
+        margin: 0px;
       }
 
       .view-options button,
@@ -433,14 +435,15 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        background-color: #28937B;
+        background-color: #5D9AA2;
         color: #fff;
         transition: background-color 0.3s;
       }
 
       .view-options button:hover,
       .filter-options button:hover {
-        background-color: #421C67;
+
+        background-color: #5D9AA2;
       }
 
       .view-options button:disabled,
@@ -508,7 +511,7 @@
     <div class="app-container">
       <div class="form-container">
         <div class="control-section">
-          <h3>Input</h3>
+          <h3>Input</h4>
           <form id="eventForm">
             <input type="hidden" id="editIndex" />
             <input
@@ -529,7 +532,7 @@
 
         <div class="control-section">
           <h3>Read</h3>
-          <div class="search-filter-container">
+          <div>
             <input
               type="text"
               id="searchInput"
@@ -539,9 +542,6 @@
             <input type="date" id="endDate" placeholder="End Date" />
             <select id="searchField" aria-label="Search field" style="display: none;">
               <option value="all" selected>All</option>
-              <!-- <option value="name">Name</option>
-              <option value="date">Date</option>
-              <option value="time">Time</option> -->
             </select>
             <div class="button-group">
               <button type="button" id="searchButton">Search</button>
@@ -582,7 +582,7 @@
             <button type="button" id="exportCSV">Export as CSV</button>
             <div>
               <label for="loadCSV">Load CSV:</label>
-              <input type="file" id="loadCSV" accept=".csv" />
+              <input type="file" id="loadCSV" placeholder="Choose a CSV file" accept=".csv"  />
             </div>
           </div>
         </div>
@@ -617,7 +617,7 @@
             </thead>
             <tbody></tbody>
           </table>
-          <div id="pagination-controls">
+          <div id="pagination-controls" style="margin: 0px ; padding:0px;">
             <button id="prevPage" class="tooltip">
               &lt;
               <span class="tooltiptext">View previous page</span>
@@ -681,7 +681,7 @@
         let currentSortColumn = 1;
         let currentSortDirection = "asc";
         let currentPage = 1;
-        let eventsPerPage = 10;
+        let eventsPerPage = 8;
         let currentRangeStart = null;
         let currentRangeEnd = null;
         const toggleFreeDaysButton = document.getElementById("toggleFreeDays");

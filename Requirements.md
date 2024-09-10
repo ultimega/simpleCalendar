@@ -43,9 +43,8 @@ DONE- Indpendent Calendar view (on new branch) with same function defnitions and
 DONE - In the Calendar View, Events should be shown only annually per the respective month, on top. Dropdowns can be used. so like a dropdown to select the year and another to select the month. then the pagination shifts the weeks.
 
 - Providing interactive Styling for the calendar view
-  - 
-  - Calendar grid to be made vertical before 
-  - 
+  DONE - Calendar grid to be made vertical before 
+  - put CSS in different file?
   we proceed
   
 - In the Calendar View, a date's events&time should be compiled into that record, oneline

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Simple Calendar 1.0</title>
+    <title>Claude - Improved Event Manager</title>
 
     <style>
       * {
@@ -168,59 +168,14 @@
         cursor: not-allowed;
         opacity: 0.65;
       }
-#deleteSelected {
-  background-color: #dc3545;
-  color: white;
-}
 
-#deleteSelected:hover:not(:disabled) {
-  background-color: #c82333;
-  font-weight: bold;
-}
+      #deleteSelected {
+        background-color: #dc3545;
+      }
 
-#deleteSelected:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-input[type="file"] {
-  background-color: #6c757d;
-}
-
-.content-container {
-  flex: 1;
-  margin-left: 340px;
-  margin-right: 10px;
-  padding: 10px;
-  overflow-y: auto;
-  height: 100%;
-  max-height: calc(100vh - 20px);
-  background: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-}
-
-@media (max-width: 768px) {
-  .content-container {
-    margin-left: 10px;
-    margin-right: 10px;
-  }
-}
-
-.table-container {
-  display: none;
-}
-
-h2 {
-  margin-bottom: 20px;
-  font-size: 22px;
-  text-transform: uppercase;
-  color: #495057;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-}
+      #deleteSelected:hover:not(:disabled) {
+        background-color: #c82333;
+      }
 
       table {
         width: 100%;
@@ -550,53 +505,49 @@ h2 {
     </style>
   </head>
   <body>
-<div class="app-container">
-  <div class="form-container">
-    <div class="control-section">
-      <h3>Input</h3>
-      <form id="eventForm">
-        <input type="hidden" id="editIndex" />
-        <input
-          type="text"
-          id="eventName"
-          required
-          placeholder="Enter event name"
-          aria-label="Event name"
-        />
-        <input type="date" id="eventDate" required />
-        <input type="time" id="eventTime" required />
-        <div class="button-group">
-          <button type="submit" id="submit">Add / Update</button>
-          <button type="button" id="deleteSelected" disabled>Delete</button>
+    <div class="app-container">
+      <div class="form-container">
+        <div class="control-section">
+          <h3>Input</h3>
+          <form id="eventForm">
+            <input type="hidden" id="editIndex" />
+            <input
+              type="text"
+              id="eventName"
+              required
+              placeholder="Enter event name"
+              aria-label="Event name"
+            />
+            <input type="date" id="eventDate" required />
+            <input type="time" id="eventTime" required />
+            <div class="button-group">
+              <button type="submit" id="submit">Add / Update</button>
+              <button type="button" id="deleteSelected" disabled>Delete</button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
 
-    <div class="control-section">
-      <h3>Read</h3>
-      <div class="search-filter-container">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search events..."
-        />
-        <input type="date" id="startDate" placeholder="Start Date" />
-        <input type="date" id="endDate" placeholder="End Date" />
-        <select id="searchField">
-          <option value="all">All</option>
-          <option value="name">Name</option>
-          <option value="date">Date</option>
-          <option value="time">Time</option>
-        </select>
-        <div class="button-group">
-          <button type="button" id="searchButton">Search</button>
-          <button type="button" id="resetButton">Reset</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-    </div>
+        <div class="control-section">
+          <h3>Read</h3>
+          <div class="search-filter-container">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search events..."
+            />
+            <input type="date" id="startDate" placeholder="Start Date" />
+            <input type="date" id="endDate" placeholder="End Date" />
+            <select id="searchField">
+              <option value="all">All</option>
+              <option value="name">Name</option>
+              <option value="date">Date</option>
+              <option value="time">Time</option>
+            </select>
+            <div class="button-group">
+              <button type="button" id="searchButton">Search</button>
+              <button type="button" id="resetButton">Reset</button>
+            </div>
+          </div>
           <div class="view-options">
             <select id="viewSelect">
               <option value="list">List View</option>
@@ -681,72 +632,18 @@ h2 {
             No events found matching your search criteria.
           </div>
         </div>
-<div class="app-container">
-  <div class="calendar-container">
-    <div class="calendar-controls">
-      <select id="yearSelect"></select>
-      <select id="monthSelect"></select>
-      <div class="rangecal">
-        <button id="prevWeek">&lt;</button>
-        <span id="currentWeekRange"></span>
-        <button id="nextWeek">&gt;</button>
-      </div>
-    </div>
-    <div class="calendar-grid" id="calendarGrid"></div>
-  </div>
 
-  <div class="content-container">
-    <div class="table-container">
-      <h5 style="text-align: right; font-family: 'Arial', sans-serif"></h5>
-      <div id="range-controls" style="display: none">
-        <button id="prevRange" class="tooltip">
-          &lt;
-          <span class="tooltiptext">View previous week</span>
-        </button>
-        <span id="currentRange"></span>
-        <button id="nextRange" class="tooltip">
-          &gt;
-          <span class="tooltiptext">View next week</span>
-        </button>
-      </div>
-      <table id="eventTable">
-        <thead>
-          <tr>
-            <th
-              onclick="selectDynamic(_)"
-              style="max-width: 15px; white-space: nowrap"
-            >
-              <div style="overflow: hidden; text-overflow: ellipsis">
-                <span title="`selectDynamic-yet to be implemented`">
-                  `selectDynamic-yet to be implemented`
-                </span>
-              </div>
-            </th>
-            <th onclick="sortTable(1)">Date</th>
-            <th onclick="sortTable(2)">Time</th>
-            <th onclick="sortTable(3)">Event Name</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div id="pagination-controls">
-        <button id="prevPage" class="tooltip">
-          &lt;
-          <span class="tooltiptext">View previous page</span>
-        </button>
-        <span id="pageInfo"></span>
-        <button id="nextPage" class="tooltip">
-          &gt;
-          <span class="tooltiptext">View next page</span>
-        </button>
-      </div>
-      <div id="noEventsFound">
-        No events found matching your search criteria.
-      </div>
-    </div>
-  </div>
-</div>
-
+        <div class="calendar-container">
+          <div class="calendar-controls">
+            <select id="yearSelect"></select>
+            <select id="monthSelect"></select>
+            <div class="rangecal">
+              <button id="prevWeek">&lt;</button>
+              <span id="currentWeekRange"></span>
+              <button id="nextWeek">&gt;</button>
+            </div>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
         </div>
       </div>
     </div>
@@ -810,12 +707,6 @@ h2 {
 
         function formatDate(date) {
           return date.toISOString().split("T")[0];
-        }
-
-        //Implemented to achieve an inactive Delete button -->
-        function updateDeleteButtonState() {
-          const deleteButton = document.getElementById("deleteSelected");
-          deleteButton.disabled = selectedEvents.size === 0;
         }
 
         function loadEvents(filter = "all", searchParams = null, page = 1) {
@@ -883,16 +774,15 @@ h2 {
           updatePagination(filteredEvents.length, page);
           sortTable(currentSortColumn, currentSortDirection);
           updateDeleteButtonState();
-// Filter events and handle no events found message
-if (filteredEvents.length === 0) {
-  noEventsFoundMessage.style.display = "block";
-} else {
-  noEventsFoundMessage.style.display = "none";
-}
 
-// Update calendar view
-updateCalendarView();
+          if (filteredEvents.length === 0) {
+            noEventsFoundMessage.style.display = "block";
+          } else {
+            noEventsFoundMessage.style.display = "none";
+          }
 
+          // Update calendar view
+          updateCalendarView();
         }
 
         function updatePagination(totalEvents, currentPage) {
@@ -1048,7 +938,6 @@ updateCalendarView();
             eventTimeField.value = event.time;
             editIndexField.value = index;
           }
-          updateDeleteButtonState();
         }
 
         function sortTable(column, direction = "asc") {
@@ -1144,46 +1033,8 @@ updateCalendarView();
           const end = endDate.value;
           const field = searchField.value;
 
-// Event filtering and loading
-document.getElementById("searchButton").addEventListener("click", function () {
-  const searchTerm = document.getElementById("searchInput").value;
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-  const field = document.getElementById("searchField").value;
-  
-  // Load events based on search filters and pagination
-  loadEvents(filterSelect.value, { searchTerm, start, end, field }, 1);
-});
-
-// Delete selected events
-document.getElementById("deleteSelected").addEventListener("click", function () {
-  if (selectedEvents.size > 0) {
-    const events = JSON.parse(localStorage.getItem("events")) || [];
-    const newEvents = events.filter((_, index) => !selectedEvents.has(index));
-    
-    // Update local storage with the new event list
-    localStorage.setItem("events", JSON.stringify(newEvents));
-    
-    // Reload events after deletion
-    loadEvents(filterSelect.value, null, 1);
-    
-    selectedEvents.clear();
-    lastSelectedIndex = null;
-    form.reset();
-    
-    // Prefill date and time fields with current date/time
-    const now = new Date();
-    eventDateField.value = now.toISOString().split("T")[0];
-    eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
-    
-    // Focus on the event name input
-    eventNameField.focus();
-    updateDeleteButtonState();
-  } else {
-    alert("Please select at least one event to delete.");
-  }
-});
-
+          loadEvents(filterSelect.value, { searchTerm, start, end, field }, 1);
+        });
 
         resetButton.addEventListener("click", function () {
           searchInput.value = "";

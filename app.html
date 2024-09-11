@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Claude - Improved Event Manager</title>
-
     <style>
       * {
         box-sizing: border-box;
@@ -17,8 +16,7 @@
         display: flex;
         min-height: 100vh;
         margin: 0;
-        background: linear-gradient(135deg, #082d71, #d1e7ff);
-        padding: 8px;
+        padding: 0px;
         overflow: hidden;
       }
 
@@ -34,10 +32,10 @@
       }
 
       .form-container {
-        width: 35%; /* Increased from 30% */
-        max-width: 400px; /* Increased from 340px */
-        background-color: #ffffff;
-        padding: 15px; /* Reduced from 20px */
+        width: 43%;
+        max-width: 400px;
+        background-color: #ccc;
+        padding: 5px;
         box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
         z-index: 1;
         transform: translateZ(20px);
@@ -45,6 +43,7 @@
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+        margin-right: 1px;
       }
 
       .form-container:hover {
@@ -59,7 +58,7 @@
         overflow-y: auto;
         height: 100vh;
         background: #ffffff;
-        border-radius: 15px;
+        border-radius: 0px;
       }
 
       h2,
@@ -76,12 +75,12 @@
       .control-section {
         background-color: #f8f9fa;
         border-radius: 8px;
-        padding: 20px;
+        padding: 10px 15px 2px 10px;
         margin-bottom: 20px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         transform: translateZ(10px);
         transition: transform 0.3s ease;
-        border: 1px solid #510707f8;
+        border: 1px solid #2d2664;
       }
 
       .control-section:hover {
@@ -90,18 +89,11 @@
 
       .control-section h3 {
         margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 18px;
+        margin-bottom: 10px;
+        font-size: 16px;
         color: #333;
-        border-bottom: 2px solid #e0e0e0;
-        padding-bottom: 5px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        color: #333;
+        border-bottom: 0.5px solid #e0e0e0;
+        padding-bottom: 0.5px;
       }
 
       input,
@@ -121,20 +113,22 @@
       select:focus {
         outline: none;
         transform: scale(1.02);
-        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        box-shadow: 0 0 10px rgba(107, 93, 162, 0.5);
       }
 
       .button-group {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 15px;
+        gap: 8px;
+        margin-top: 0px;
+        margin-bottom: 10px;
       }
 
       button,
       input[type="file"] {
         padding: 12px;
-        background-color: #343a40;
+
+        background-color: #2d2664;
         color: white;
         border: none;
         border-radius: 8px;
@@ -148,13 +142,13 @@
 
       button:hover,
       input[type="file"]:hover {
-        background-color: #0056b3;
+        background-color: #655da2;
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
       }
 
       #submit:hover {
-        background-color: rgb(0, 120, 0);
+        background-color: #3f994c;
       }
 
       button:active,
@@ -170,11 +164,11 @@
       }
 
       #deleteSelected {
-        background-color: #dc3545;
+        background-color: #721c24;
       }
 
       #deleteSelected:hover:not(:disabled) {
-        background-color: #c82333;
+        background-color: #e20909;
       }
 
       table {
@@ -191,11 +185,11 @@
       td {
         padding: 12px;
         text-align: left;
-        border-bottom: 1px solid #22922f78;
+        border-bottom: 1px solid #655da2;
       }
 
       th {
-        background-color: #343a40;
+        background-color: #2d2664;
         color: white;
         cursor: pointer;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
@@ -203,7 +197,7 @@
       }
 
       th:hover {
-        background-color: #495057;
+        background-color: #2d2664e2;
       }
 
       th::after {
@@ -253,6 +247,10 @@
         margin-bottom: 15px;
         flex-wrap: wrap;
         gap: 10px;
+      }
+
+      .table-container {
+        background-color: #ffffff;
       }
 
       #yearSelect,
@@ -384,8 +382,8 @@
       }
 
       .search-filter-container {
-        margin-top: 20px;
-        padding: 15px;
+        margin-top: 0px;
+        padding: 0px 0px 5px 5px;
         background-color: #f8f9fa;
         border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -424,7 +422,7 @@
       .filter-options {
         display: flex;
         justify-content: space-between;
-        margin-top: 20px;
+        margin: 0px;
       }
 
       .view-options button,
@@ -433,14 +431,14 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        background-color: #007bff;
+        background-color: #5d9aa2;
         color: #fff;
         transition: background-color 0.3s;
       }
 
       .view-options button:hover,
       .filter-options button:hover {
-        background-color: #0056b3;
+        background-color: #5d9aa2;
       }
 
       .view-options button:disabled,
@@ -458,6 +456,64 @@
         border-radius: 10px;
       }
 
+      .batch-popup-trigger {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background-color: #2d2664;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .batch-popup-trigger:hover {
+        background-color: #655da2;
+        transform: scale(1.1);
+      }
+
+      .batch-popup {
+        position: fixed;
+        bottom: 90px;
+        left: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+      }
+
+      .batch-popup.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .batch-popup h3 {
+        margin-top: 0;
+      }
+
+      .batch-popup .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .batch-popup button,
+      .batch-popup input[type="file"] {
+        width: 100%;
+      }
+
       @media (max-width: 768px) {
         .app-container {
           flex-direction: column;
@@ -466,7 +522,7 @@
 
         .form-container {
           width: 100%;
-          max-width: 100%; /* Changed from 00% to 100% */
+          max-width: 100%;
           margin-bottom: 20px;
         }
 
@@ -502,6 +558,64 @@
           font-size: 0.8rem;
         }
       }
+      .batch-popup-trigger {
+        position:fixed;
+        bottom: 20px;
+        left: 20px;
+        background-color: #2d2664;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .batch-popup-trigger:hover {
+        background-color: #655da2;
+        transform: scale(1.1);
+      }
+
+      .batch-popup {
+        position: fixed;
+        bottom: 90px;
+        left: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 18px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+      }
+
+      .batch-popup.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .batch-popup h3 {
+        margin-top: 0;
+      }
+
+      .batch-popup .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .batch-popup button,
+      .batch-popup input[type="file"] {
+        width: 100%;
+      }
+
     </style>
   </head>
   <body>
@@ -529,7 +643,7 @@
 
         <div class="control-section">
           <h3>Read</h3>
-          <div class="search-filter-container">
+          <div>
             <input
               type="text"
               id="searchInput"
@@ -537,11 +651,12 @@
             />
             <input type="date" id="startDate" placeholder="Start Date" />
             <input type="date" id="endDate" placeholder="End Date" />
-            <select id="searchField">
-              <option value="all">All</option>
-              <option value="name">Name</option>
-              <option value="date">Date</option>
-              <option value="time">Time</option>
+            <select
+              id="searchField"
+              aria-label="Search field"
+              style="display: none"
+            >
+              <option value="all" selected>All</option>
             </select>
             <div class="button-group">
               <button type="button" id="searchButton">Search</button>
@@ -562,30 +677,7 @@
           </div>
         </div>
 
-        <div class="control-section">
-          <h3>Batch</h3>
-          <div class="button-group">
-            <button id="selectAll" type="button" class="tooltip">
-              Select All
-              <span class="tooltiptext">Select all visible events</span>
-            </button>
-            <button id="selectBetween" type="button" class="tooltip">
-              Select Between
-              <span class="tooltiptext"
-                >Select events between two selected events</span
-              >
-            </button>
-            <button id="toggleFreeDays" type="button" class="tooltip">
-              Toggle FreeDays
-              <span class="tooltiptext">Show/Hide days without events</span>
-            </button>
-            <button type="button" id="exportCSV">Export as CSV</button>
-            <div>
-              <label for="loadCSV">Load CSV:</label>
-              <input type="file" id="loadCSV" accept=".csv" />
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       <div class="content-container">
@@ -607,7 +699,15 @@
               <tr>
                 <th style="max-width: 15px; white-space: nowrap">
                   <div style="overflow: hidden; text-overflow: ellipsis">
-                    <span title="Select">Select</span>
+                    <input
+                      type="checkbox"
+                      id="selectAllCheckbox"
+                      class="tooltip"
+                    />
+                    <!-- <span class="tooltiptext"
+                      >Select all displayed events or range of selected
+                      events</span
+                    > -->
                   </div>
                 </th>
                 <th>Date</th>
@@ -617,7 +717,7 @@
             </thead>
             <tbody></tbody>
           </table>
-          <div id="pagination-controls">
+          <div id="pagination-controls" style="margin: 0px; padding: 0px">
             <button id="prevPage" class="tooltip">
               &lt;
               <span class="tooltiptext">View previous page</span>
@@ -646,11 +746,44 @@
           <div class="calendar-grid" id="calendarGrid"></div>
         </div>
       </div>
+
+      <!-- New, experimenting -->
+      <button class="batch-popup-trigger" id="batchPopupTrigger">B</button>
+
+      <div class="batch-popup" id="batchPopup">
+        <h3>Batch Operations</h3>
+        <div class="button-group">
+          <button id="selectAll" type="button" class="tooltip">
+            Select All
+            <span class="tooltiptext">Select all visible events</span>
+          </button>
+          <button id="selectBetween" type="button" class="tooltip">
+            Select Between
+            <span class="tooltiptext"
+              >Select events between two selected events</span
+            >
+          </button>
+          <button id="toggleFreeDays" type="button" class="tooltip">
+            Toggle FreeDays
+            <span class="tooltiptext">Show/Hide days without events</span>
+          </button>
+          <button type="button" id="exportCSV">Export as CSV</button>
+          <div>
+            <label for="loadCSV">Load CSV:</label>
+            <input
+              type="file"
+              id="loadCSV"
+              placeholder="Choose a CSV file"
+              accept=".csv"
+            />
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", (event) => {
-        // Existing variables and functions
         const form = document.getElementById("eventForm");
         const table = document.getElementById("eventTable");
         const tbody = table.getElementsByTagName("tbody")[0];
@@ -676,18 +809,7 @@
         const prevRangeButton = document.getElementById("prevRange");
         const nextRangeButton = document.getElementById("nextRange");
         const currentRangeSpan = document.getElementById("currentRange");
-        let selectedEvents = new Set();
-        let lastSelectedIndex = null;
-        let currentSortColumn = 1;
-        let currentSortDirection = "asc";
-        let currentPage = 1;
-        let eventsPerPage = 10;
-        let currentRangeStart = null;
-        let currentRangeEnd = null;
         const toggleFreeDaysButton = document.getElementById("toggleFreeDays");
-        let showFreeDays = false;
-
-        // New variables for calendar view
         const calendarContainer = document.querySelector(".calendar-container");
         const tableContainer = document.querySelector(".table-container");
         const yearSelect = document.getElementById("yearSelect");
@@ -697,7 +819,19 @@
         const currentWeekRangeSpan =
           document.getElementById("currentWeekRange");
         const calendarGrid = document.getElementById("calendarGrid");
+        const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+        const batchPopupTrigger = document.getElementById("batchPopupTrigger");
+        const batchPopup = document.getElementById("batchPopup");
 
+        let selectedEvents = new Set();
+        let lastSelectedIndex = null;
+        let currentSortColumn = 1;
+        let currentSortDirection = "asc";
+        let currentPage = 1;
+        let eventsPerPage = 8;
+        let currentRangeStart = null;
+        let currentRangeEnd = null;
+        let showFreeDays = false;
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
         let currentWeekStart = new Date();
@@ -705,8 +839,34 @@
           currentWeekStart.getDate() - currentWeekStart.getDay()
         );
 
-        function formatDate(date) {
-          return date.toISOString().split("T")[0];
+        function formatDate(date, includeYear = true) {
+          const options = {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: includeYear ? "numeric" : undefined,
+          };
+          const formattedDate = new Date(date).toLocaleDateString(
+            "en-US",
+            options
+          );
+          const day = new Date(date).getDate();
+          const suffix = getDaySuffix(day);
+          return formattedDate.replace(/(\d+)/, `$1${suffix}`);
+        }
+
+        function getDaySuffix(day) {
+          if (day > 3 && day < 21) return "th";
+          switch (day % 10) {
+            case 1:
+              return "st";
+            case 2:
+              return "nd";
+            case 3:
+              return "rd";
+            default:
+              return "th";
+          }
         }
 
         function loadEvents(filter = "all", searchParams = null, page = 1) {
@@ -729,12 +889,16 @@
 
           if (searchParams) {
             filteredEvents = filteredEvents.filter((event) => {
+              const searchTerm = searchParams.searchTerm.toLowerCase();
+              const eventDate = new Date(event.date);
               const matchesTerm =
-                event.name
+                event.name.toLowerCase().includes(searchTerm) ||
+                event.date.includes(searchTerm) ||
+                event.time.includes(searchTerm) ||
+                eventDate
+                  .toLocaleString("default", { month: "long" })
                   .toLowerCase()
-                  .includes(searchParams.searchTerm.toLowerCase()) ||
-                event.date.includes(searchParams.searchTerm) ||
-                event.time.includes(searchParams.searchTerm);
+                  .includes(searchTerm);
               const matchesDate =
                 (!searchParams.start || event.date >= searchParams.start) &&
                 (!searchParams.end || event.date <= searchParams.end);
@@ -754,7 +918,7 @@
               <td><input type="checkbox" ${
                 selectedEvents.has(globalIndex) ? "checked" : ""
               } /></td>
-              <td>${event.date}</td>
+              <td>${formatDate(event.date)}</td>
               <td>${event.time}</td>
               <td>${event.name}</td>
             `;
@@ -781,7 +945,6 @@
             noEventsFoundMessage.style.display = "none";
           }
 
-          // Update calendar view
           updateCalendarView();
         }
 
@@ -880,8 +1043,9 @@
           weekEnd.setDate(weekEnd.getDate() + 6);
 
           currentWeekRangeSpan.textContent = `${formatDate(
-            weekStart
-          )} - ${formatDate(weekEnd)}`;
+            weekStart,
+            false
+          )} - ${formatDate(weekEnd, false)}`;
 
           calendarGrid.innerHTML = "";
 
@@ -894,9 +1058,7 @@
 
             const dateDiv = document.createElement("div");
             dateDiv.classList.add("calendar-date");
-            dateDiv.textContent = `${day.toLocaleDateString("en-US", {
-              weekday: "short",
-            })} ${formatDate(day)}`;
+            dateDiv.textContent = formatDate(day, false);
             column.appendChild(dateDiv);
 
             const eventsDiv = document.createElement("div");
@@ -972,6 +1134,28 @@
 
           currentSortColumn = column;
           currentSortDirection = direction;
+        }
+
+        //not working as expected
+        function dynamicSelectAll() {
+          const checkboxes = tbody.querySelectorAll('input[type="checkbox"]');
+          const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+
+          checkboxes.forEach((checkbox, index) => {
+            const globalIndex = (currentPage - 1) * eventsPerPage + index;
+            checkbox.checked = !allChecked;
+            const row = checkbox.closest("tr");
+            if (!allChecked) {
+              selectedEvents.add(globalIndex);
+              row.classList.add("selected");
+            } else {
+              selectedEvents.delete(globalIndex);
+              row.classList.remove("selected");
+            }
+          });
+
+          updateLastSelected();
+          updateDeleteButtonState();
         }
 
         // Event Listeners
@@ -1260,6 +1444,17 @@
           updateCalendarView();
         });
 
+        batchPopupTrigger.addEventListener("click", () => {
+          batchPopup.classList.toggle("show");
+        });
+
+        // Close popup when clicking outside
+        document.addEventListener("click", (event) => {
+          if (!batchPopup.contains(event.target) && event.target !== batchPopupTrigger) {
+            batchPopup.classList.remove("show");
+          }
+        });
+
         Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
           if (index > 0) {
             th.addEventListener("click", () => {
@@ -1270,6 +1465,8 @@
             });
           }
         });
+
+        selectAllCheckbox.addEventListener("change", dynamicSelectAll);
 
         // Initialize views
         const now = new Date();

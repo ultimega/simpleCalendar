@@ -456,6 +456,64 @@
         border-radius: 10px;
       }
 
+      .batch-popup-trigger {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background-color: #2d2664;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .batch-popup-trigger:hover {
+        background-color: #655da2;
+        transform: scale(1.1);
+      }
+
+      .batch-popup {
+        position: fixed;
+        bottom: 90px;
+        left: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+      }
+
+      .batch-popup.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .batch-popup h3 {
+        margin-top: 0;
+      }
+
+      .batch-popup .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .batch-popup button,
+      .batch-popup input[type="file"] {
+        width: 100%;
+      }
+
       @media (max-width: 768px) {
         .app-container {
           flex-direction: column;
@@ -658,6 +716,40 @@
           <div class="calendar-grid" id="calendarGrid"></div>
         </div>
       </div>
+
+      <!-- New, experimenting -->
+      <button class="batch-popup-trigger" id="batchPopupTrigger">B</button>
+
+      <div class="batch-popup" id="batchPopup">
+        <h3>Batch Operations</h3>
+        <div class="button-group">
+          <button id="selectAll" type="button" class="tooltip">
+            Select All
+            <span class="tooltiptext">Select all visible events</span>
+          </button>
+          <button id="selectBetween" type="button" class="tooltip">
+            Select Between
+            <span class="tooltiptext"
+              >Select events between two selected events</span
+            >
+          </button>
+          <button id="toggleFreeDays" type="button" class="tooltip">
+            Toggle FreeDays
+            <span class="tooltiptext">Show/Hide days without events</span>
+          </button>
+          <button type="button" id="exportCSV">Export as CSV</button>
+          <div>
+            <label for="loadCSV">Load CSV:</label>
+            <input
+              type="file"
+              id="loadCSV"
+              placeholder="Choose a CSV file"
+              accept=".csv"
+            />
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <script>
@@ -698,6 +790,8 @@
           document.getElementById("currentWeekRange");
         const calendarGrid = document.getElementById("calendarGrid");
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+        const batchPopupTrigger = document.getElementById("batchPopupTrigger");
+        const batchPopup = document.getElementById("batchPopup");
 
         let selectedEvents = new Set();
         let lastSelectedIndex = null;
@@ -1012,6 +1106,7 @@
           currentSortDirection = direction;
         }
 
+        //not working as expected
         function dynamicSelectAll() {
           const checkboxes = tbody.querySelectorAll('input[type="checkbox"]');
           const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
@@ -1317,6 +1412,17 @@
         nextWeekButton.addEventListener("click", () => {
           currentWeekStart.setDate(currentWeekStart.getDate() + 7);
           updateCalendarView();
+        });
+
+        batchPopupTrigger.addEventListener("click", () => {
+          batchPopup.classList.toggle("show");
+        });
+
+        // Close popup when clicking outside
+        document.addEventListener("click", (event) => {
+          if (!batchPopup.contains(event.target) && event.target !== batchPopupTrigger) {
+            batchPopup.classList.remove("show");
+          }
         });
 
         Array.from(table.tHead.rows[0].cells).forEach((th, index) => {

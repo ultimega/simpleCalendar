@@ -200,22 +200,6 @@
         background-color: #2d2664e2;
       }
 
-      th::after {
-        content: "\00a0\25B4\25BE";
-        font-size: 1.2em;
-        color: #adb5bd;
-      }
-
-      th.asc::after {
-        content: "\00a0\25B4";
-        color: white;
-      }
-
-      th.desc::after {
-        content: "\00a0\25BE";
-        color: white;
-      }
-
       tbody tr:last-child td {
         border-bottom: none;
       }
@@ -236,83 +220,8 @@
         background-color: #cce5ff;
       }
 
-      .calendar-container {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .calendar-controls {
-        display: flex;
-        justify-content: flex-start;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
       .table-container {
         background-color: #ffffff;
-      }
-
-      #yearSelect,
-      #monthSelect,
-      #prevWeek,
-      #nextWeek {
-        padding: 8px;
-        border-radius: 4px;
-        font-size: 16px;
-        flex: 1;
-        min-width: 80px;
-        max-width: 120px;
-      }
-
-      #prevWeek,
-      #nextWeek {
-        border: none;
-        cursor: pointer;
-      }
-
-      .calendar-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .calendar-column {
-        display: flex;
-        border: 1px solid #e0e0e0;
-        border-radius: 4px;
-        overflow: hidden;
-      }
-
-      .calendar-date {
-        flex: 0 0 100px;
-        padding: 10px;
-        background-color: #f8f9fa;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .calendar-events {
-        flex: 1;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-
-      .calendar-event {
-        background-color: #e7f5ff;
-        padding: 5px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-
-      .calendar-event:hover {
-        background-color: #cce5ff;
-        transform: translateY(-2px);
       }
 
       .tooltip {
@@ -537,8 +446,7 @@
           align-items: stretch;
         }
 
-        #yearSelect,
-        #monthSelect,
+
         #prevWeek,
         #nextWeek {
           max-width: 100%;
@@ -559,7 +467,7 @@
         }
       }
       .batch-popup-trigger {
-        position:fixed;
+        position: fixed;
         bottom: 20px;
         left: 20px;
         background-color: #2d2664;
@@ -615,7 +523,6 @@
       .batch-popup input[type="file"] {
         width: 100%;
       }
-
     </style>
   </head>
   <body>
@@ -663,12 +570,7 @@
               <button type="button" id="resetButton">Reset</button>
             </div>
           </div>
-          <div class="view-options">
-            <select id="viewSelect">
-              <option value="list">List View</option>
-              <option value="calendar">Calendar View</option>
-            </select>
-          </div>
+
           <div class="filter-options">
             <select id="filterSelect">
               <option value="all">All Events</option>
@@ -676,8 +578,6 @@
             </select>
           </div>
         </div>
-
-        
       </div>
 
       <div class="content-container">
@@ -732,22 +632,9 @@
             No events found matching your search criteria.
           </div>
         </div>
-
-        <div class="calendar-container">
-          <div class="calendar-controls">
-            <select id="yearSelect"></select>
-            <select id="monthSelect"></select>
-            <div class="rangecal">
-              <button id="prevWeek">&lt;</button>
-              <span id="currentWeekRange"></span>
-              <button id="nextWeek">&gt;</button>
-            </div>
-          </div>
-          <div class="calendar-grid" id="calendarGrid"></div>
-        </div>
       </div>
 
-      <!-- New, experimenting -->
+      <!-- To Reverse the pop-up -->
       <button class="batch-popup-trigger" id="batchPopupTrigger">B</button>
 
       <div class="batch-popup" id="batchPopup">
@@ -779,7 +666,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <script>
@@ -812,12 +698,8 @@
         const toggleFreeDaysButton = document.getElementById("toggleFreeDays");
         const calendarContainer = document.querySelector(".calendar-container");
         const tableContainer = document.querySelector(".table-container");
-        const yearSelect = document.getElementById("yearSelect");
-        const monthSelect = document.getElementById("monthSelect");
-        const prevWeekButton = document.getElementById("prevWeek");
-        const nextWeekButton = document.getElementById("nextWeek");
-        const currentWeekRangeSpan =
-          document.getElementById("currentWeekRange");
+
+        const currentWeekRangeSpan =          document.getElementById("currentWeekRange");
         const calendarGrid = document.getElementById("calendarGrid");
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
         const batchPopupTrigger = document.getElementById("batchPopupTrigger");
@@ -945,7 +827,7 @@
             noEventsFoundMessage.style.display = "none";
           }
 
-          updateCalendarView();
+          
         }
 
         function updatePagination(totalEvents, currentPage) {
@@ -1000,90 +882,6 @@
               lastSelectedRow.classList.add("last-selected");
             }
           }
-        }
-
-        function initializeSelects() {
-          const currentYear = new Date().getFullYear();
-          yearSelect.innerHTML = "";
-          for (let year = currentYear - 10; year <= currentYear + 10; year++) {
-            const option = document.createElement("option");
-            option.value = year;
-            option.textContent = year;
-            yearSelect.appendChild(option);
-          }
-          yearSelect.value = currentYear;
-
-          monthSelect.innerHTML = "";
-          const months = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-          ];
-          months.forEach((month, index) => {
-            const option = document.createElement("option");
-            option.value = index;
-            option.textContent = month;
-            monthSelect.appendChild(option);
-          });
-          monthSelect.value = currentMonth;
-        }
-
-        function updateCalendarView() {
-          const weekStart = new Date(currentWeekStart);
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekEnd.getDate() + 6);
-
-          currentWeekRangeSpan.textContent = `${formatDate(
-            weekStart,
-            false
-          )} - ${formatDate(weekEnd, false)}`;
-
-          calendarGrid.innerHTML = "";
-
-          for (let i = 6; i >= 0; i--) {
-            const day = new Date(weekEnd);
-            day.setDate(day.getDate() - i);
-
-            const column = document.createElement("div");
-            column.classList.add("calendar-column");
-
-            const dateDiv = document.createElement("div");
-            dateDiv.classList.add("calendar-date");
-            dateDiv.textContent = formatDate(day, false);
-            column.appendChild(dateDiv);
-
-            const eventsDiv = document.createElement("div");
-            eventsDiv.classList.add("calendar-events");
-
-            const events = getEventsForDate(day);
-            events.forEach((event) => {
-              const eventDiv = document.createElement("div");
-              eventDiv.classList.add("calendar-event");
-              eventDiv.textContent = `${event.time} - ${event.name}`;
-              eventDiv.addEventListener("click", () => editEvent(event));
-              eventsDiv.appendChild(eventDiv);
-            });
-
-            column.appendChild(eventsDiv);
-            calendarGrid.appendChild(column);
-          }
-        }
-
-        function getEventsForDate(date) {
-          const events = JSON.parse(localStorage.getItem("events")) || [];
-          return events.filter((event) => {
-            const eventDate = new Date(event.date);
-            return eventDate.toDateString() === date.toDateString();
-          });
         }
 
         function editEvent(event) {
@@ -1181,7 +979,7 @@
 
           localStorage.setItem("events", JSON.stringify(events));
           loadEvents(filterSelect.value, null, currentPage);
-          updateCalendarView();
+          
           form.reset();
           editIndexField.value = "";
           selectedEvents.clear();
@@ -1194,18 +992,7 @@
           eventNameField.focus();
         });
 
-        viewSelect.addEventListener("change", function () {
-          if (this.value === "list") {
-            tableContainer.style.display = "block";
-            calendarContainer.style.display = "none";
-            loadEvents(filterSelect.value, null, 1);
-          } else {
-            tableContainer.style.display = "none";
-            calendarContainer.style.display = "flex";
-            initializeSelects();
-            updateCalendarView();
-          }
-        });
+
 
         filterSelect.addEventListener("change", function () {
           loadEvents(this.value, null, 1);
@@ -1340,7 +1127,7 @@
               );
               localStorage.setItem("events", JSON.stringify(newEvents));
               loadEvents(filterSelect.value, null, 1);
-              updateCalendarView();
+              
               selectedEvents.clear();
               lastSelectedIndex = null;
               form.reset();
@@ -1412,7 +1199,7 @@
               localStorage.setItem("events", JSON.stringify(events));
 
               loadEvents(filterSelect.value, null, 1);
-              updateCalendarView();
+              
 
               event.target.value = "";
             };
@@ -1420,37 +1207,16 @@
             reader.readAsText(file);
           });
 
-        yearSelect.addEventListener("change", () => {
-          currentYear = parseInt(yearSelect.value);
-          updateCalendarView();
-        });
-
-        monthSelect.addEventListener("change", () => {
-          currentMonth = parseInt(monthSelect.value);
-          currentWeekStart = new Date(currentYear, currentMonth, 1);
-          currentWeekStart.setDate(
-            currentWeekStart.getDate() - currentWeekStart.getDay()
-          );
-          updateCalendarView();
-        });
-
-        prevWeekButton.addEventListener("click", () => {
-          currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-          updateCalendarView();
-        });
-
-        nextWeekButton.addEventListener("click", () => {
-          currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-          updateCalendarView();
-        });
-
         batchPopupTrigger.addEventListener("click", () => {
           batchPopup.classList.toggle("show");
         });
 
         // Close popup when clicking outside
         document.addEventListener("click", (event) => {
-          if (!batchPopup.contains(event.target) && event.target !== batchPopupTrigger) {
+          if (
+            !batchPopup.contains(event.target) &&
+            event.target !== batchPopupTrigger
+          ) {
             batchPopup.classList.remove("show");
           }
         });
@@ -1473,9 +1239,7 @@
         eventDateField.value = now.toISOString().split("T")[0];
         eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
         loadEvents();
-        initializeSelects();
-        updateCalendarView();
-        viewSelect.dispatchEvent(new Event("change"));
+        tableContainer.style.display = "block";
         document.getElementById("eventName").focus();
       });
     </script>

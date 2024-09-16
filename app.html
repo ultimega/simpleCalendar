@@ -44,6 +44,7 @@
         display: flex;
         flex-direction: column;
         margin-right: 1px;
+        max-height: 100vh;
       }
 
       .form-container:hover {
@@ -446,7 +447,6 @@
           align-items: stretch;
         }
 
-
         #prevWeek,
         #nextWeek {
           max-width: 100%;
@@ -524,6 +524,11 @@
         width: 100%;
       }
     </style>
+
+    <!-- Firebase SDK and db -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script> 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
   </head>
   <body>
     <div class="app-container">
@@ -699,7 +704,8 @@
         const calendarContainer = document.querySelector(".calendar-container");
         const tableContainer = document.querySelector(".table-container");
 
-        const currentWeekRangeSpan =          document.getElementById("currentWeekRange");
+        const currentWeekRangeSpan =
+          document.getElementById("currentWeekRange");
         const calendarGrid = document.getElementById("calendarGrid");
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
         const batchPopupTrigger = document.getElementById("batchPopupTrigger");
@@ -752,7 +758,7 @@
         }
 
         function loadEvents(filter = "all", searchParams = null, page = 1) {
-          const events = JSON.parse(localStorage.getItem("events")) || [];
+          const events = JSON.parse(localStorage.getItem("events")) || []; //DataHouse DataPush
           let filteredEvents = events;
 
           if (filter === "week") {
@@ -826,8 +832,6 @@
           } else {
             noEventsFoundMessage.style.display = "none";
           }
-
-          
         }
 
         function updatePagination(totalEvents, currentPage) {
@@ -965,7 +969,7 @@
           const eventTime = eventTimeField.value;
           const editIndex = editIndexField.value;
 
-          const events = JSON.parse(localStorage.getItem("events")) || [];
+          const events = JSON.parse(localStorage.getItem("events")) || []; // firebase.database().ref('events').once('value')
 
           if (editIndex === "") {
             events.push({ name: eventName, date: eventDate, time: eventTime });
@@ -978,8 +982,10 @@
           }
 
           localStorage.setItem("events", JSON.stringify(events));
+          console.log(JSON.stringify(events)); //DataHouse //Check data being stored
+
           loadEvents(filterSelect.value, null, currentPage);
-          
+
           form.reset();
           editIndexField.value = "";
           selectedEvents.clear();
@@ -991,8 +997,6 @@
 
           eventNameField.focus();
         });
-
-
 
         filterSelect.addEventListener("change", function () {
           loadEvents(this.value, null, 1);
@@ -1127,7 +1131,7 @@
               );
               localStorage.setItem("events", JSON.stringify(newEvents));
               loadEvents(filterSelect.value, null, 1);
-              
+
               selectedEvents.clear();
               lastSelectedIndex = null;
               form.reset();
@@ -1199,7 +1203,6 @@
               localStorage.setItem("events", JSON.stringify(events));
 
               loadEvents(filterSelect.value, null, 1);
-              
 
               event.target.value = "";
             };
@@ -1239,7 +1242,7 @@
         eventDateField.value = now.toISOString().split("T")[0];
         eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
         loadEvents();
-        tableContainer.style.display = "block";
+        tableContainer.style.display = ""; // can set to block, flex or flexbox(vertical NavBars)
         document.getElementById("eventName").focus();
       });
     </script>

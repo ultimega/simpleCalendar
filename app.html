@@ -524,11 +524,6 @@
         width: 100%;
       }
     </style>
-
-    <!-- Firebase SDK and db -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script> 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
   </head>
   <body>
     <div class="app-container">
@@ -673,7 +668,33 @@
       </div>
     </div>
 
-    <script>
+<script type="module">
+
+  //FIREBASE 
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAFKQ-g5-ZivxHQ3y3KW9JoHVwTzNQmLB4",
+    authDomain: "simple-calendar-ultimega.firebaseapp.com",
+    projectId: "simple-calendar-ultimega",
+    storageBucket: "simple-calendar-ultimega.appspot.com",
+    messagingSenderId: "610639720462",
+    appId: "1:610639720462:web:cef59ff4d3479fc7090c5f",
+    measurementId: "G-RJWHRX0R13"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  
+
+
       document.addEventListener("DOMContentLoaded", (event) => {
         const form = document.getElementById("eventForm");
         const table = document.getElementById("eventTable");

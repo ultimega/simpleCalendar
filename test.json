@@ -1,0 +1,19 @@
+{
+  "events": [
+    {
+      "name": "Meeting with Bob",
+      "date": "2023-10-01",
+      "time": "10:00"
+    },
+    {
+      "name": "Lunch with Alice",
+      "date": "2023-10-02",
+      "time": "12:00"
+    },
+    {
+      "name": "Conference Call",
+      "date": "2023-10-03",
+      "time": "15:00"
+    }
+  ]
+}

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Manager</title>
 
-<!-- TODO: Clean Styles -->
+    <!-- TODO: Clean Styles -->
     <style>
       * {
         box-sizing: border-box;
@@ -757,80 +757,164 @@
         }
 
         function loadEvents(filter = "all", searchParams = null, page = 1) {
-          console.log("Loading events. Filter:", filter, "Show free days:", showFreeDays, "Page:", page);
-          
+          console.log(
+            "Loading events. Filter:",
+            filter,
+            "Show free days:",
+            showFreeDays,
+            "Page:",
+            page
+          );
+
           const events = JSON.parse(localStorage.getItem("events")) || [];
           let filteredEvents = [];
-        
+
           const today = new Date();
           const startOfWeek = new Date(today);
           startOfWeek.setDate(today.getDate() - today.getDay());
           const endOfWeek = new Date(startOfWeek);
           endOfWeek.setDate(startOfWeek.getDate() + 6);
-        
-          console.log("Week range:", startOfWeek.toDateString(), "to", endOfWeek.toDateString());
-        
+
+          console.log(
+            "Week range:",
+            startOfWeek.toDateString(),
+            "to",
+            endOfWeek.toDateString()
+          );
+
           if (filter === "week") {
-            for (let d = new Date(startOfWeek); d <= endOfWeek; d.setDate(d.getDate() + 1)) {
+            for (
+              let d = new Date(startOfWeek);
+              d <= endOfWeek;
+              d.setDate(d.getDate() + 1)
+            ) {
               const currentDate = new Date(d);
-              const existingEvent = events.find(event => new Date(event.date).toDateString() === currentDate.toDateString());
-              
+              const existingEvent = events.find(
+                (event) =>
+                  new Date(event.date).toDateString() ===
+                  currentDate.toDateString()
+              );
+
               if (existingEvent) {
                 filteredEvents.push(existingEvent);
               } else if (showFreeDays) {
                 filteredEvents.push({
                   name: "Free",
-                  date: currentDate.toISOString().split('T')[0],
-                  time: "--:--"
+                  date: currentDate.toISOString().split("T")[0],
+                  time: "--:--",
                 });
               }
             }
           } else {
             filteredEvents = events;
           }
-        
+
           if (searchParams) {
             const { searchTerm, start, end } = searchParams;
-            filteredEvents = filteredEvents.filter(event => {
+            filteredEvents = filteredEvents.filter((event) => {
               const eventDate = new Date(event.date);
-              const matchesTerm = searchTerm ? (
-                event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                event.date.includes(searchTerm) ||
-                event.time.includes(searchTerm) ||
-                eventDate.toLocaleString('default', { month: 'long' }).toLowerCase().includes(searchTerm.toLowerCase())
-              ) : true;
-              const matchesDateRange = 
-                (!start || event.date >= start) &&
-                (!end || event.date <= end);
+              const matchesTerm = searchTerm
+                ? event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  event.date.includes(searchTerm) ||
+                  event.time.includes(searchTerm) ||
+                  eventDate
+                    .toLocaleString("default", { month: "long" })
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+                : true;
+              const matchesDateRange =
+                (!start || event.date >= start) && (!end || event.date <= end);
               return matchesTerm && matchesDateRange;
             });
           }
-        
+
           console.log("Filtered events:", filteredEvents);
-        
+
           const startIndex = (page - 1) * eventsPerPage;
           const endIndex = startIndex + eventsPerPage;
           const paginatedEvents = filteredEvents.slice(startIndex, endIndex);
-        
+
           console.log("Paginated events:", paginatedEvents);
+
+          tbody.innerHTML = "";
+          paginatedEvents.forEach((event, index) => {
+            const row = tbody.insertRow();
+            const globalIndex = startIndex + index;
+            const isFreeDay = event.name === "Free";
+
+            row.innerHTML = `
+              <td><input type="checkbox" ${
+                selectedEvents.has(globalIndex) ? "checked" : ""
+              } ${isFreeDay ? "disabled" : ""} /></td>
+              <td>${formatDate(event.date)}</td>
+              <td>${event.time}</td>
+              <td>${event.name}</td>
+            `;
+
+            if (selectedEvents.has(globalIndex)) row.classList.add("selected");
+            if (globalIndex === lastSelectedIndex)
+              row.classList.add("last-selected");
+            if (isFreeDay) row.classList.add("free-day");
+
+            if (!isFreeDay) {
+              row
+                .querySelector('input[type="checkbox"]')
+                .addEventListener("change", function () {
+                  toggleEventSelection(this, globalIndex);
+                });
+            }
+          });
+
+          console.log("Table rows:", tbody.innerHTML);
+
+          updatePagination(filteredEvents.length, page);
+          sortTable(currentSortColumn, currentSortDirection);
+          updateDeleteButtonState();
+
+          noEventsFoundMessage.style.display =
+            filteredEvents.length === 0 ? "block" : "none";
+        }
+
+        function loadWeekWithFreeDays(page = 1) {
+          const events = JSON.parse(localStorage.getItem("events")) || [];
+          const today = new Date();
+          const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(startOfWeek.getDate() + 6);
+        
+          let weekEvents = [];
+          for (let d = new Date(startOfWeek); d <= endOfWeek; d.setDate(d.getDate() + 1)) {
+            const currentDate = new Date(d);
+            const existingEvent = events.find(event => new Date(event.date).toDateString() === currentDate.toDateString());
+            if (existingEvent) {
+              weekEvents.push(existingEvent);
+            } else {
+              weekEvents.push({
+                name: "Free",
+                date: currentDate.toISOString().split('T')[0],
+                time: "--:--"
+              });
+            }
+          }
+        
+          const startIndex = (page - 1) * eventsPerPage;
+          const endIndex = startIndex + eventsPerPage;
+          const paginatedEvents = weekEvents.slice(startIndex, endIndex);
         
           tbody.innerHTML = "";
           paginatedEvents.forEach((event, index) => {
             const row = tbody.insertRow();
             const globalIndex = startIndex + index;
             const isFreeDay = event.name === "Free";
-            
             row.innerHTML = `
               <td><input type="checkbox" ${selectedEvents.has(globalIndex) ? "checked" : ""} ${isFreeDay ? "disabled" : ""} /></td>
               <td>${formatDate(event.date)}</td>
               <td>${event.time}</td>
               <td>${event.name}</td>
             `;
-            
             if (selectedEvents.has(globalIndex)) row.classList.add("selected");
             if (globalIndex === lastSelectedIndex) row.classList.add("last-selected");
             if (isFreeDay) row.classList.add("free-day");
-            
             if (!isFreeDay) {
               row.querySelector('input[type="checkbox"]').addEventListener("change", function() {
                 toggleEventSelection(this, globalIndex);
@@ -838,13 +922,9 @@
             }
           });
         
-          console.log("Table rows:", tbody.innerHTML);
-          
-          updatePagination(filteredEvents.length, page);
+          updatePagination(weekEvents.length, page);
           sortTable(currentSortColumn, currentSortDirection);
           updateDeleteButtonState();
-        
-          noEventsFoundMessage.style.display = filteredEvents.length === 0 ? "block" : "none";
         }
         
         function updatePagination(totalEvents, currentPage) {
@@ -1162,11 +1242,17 @@
             }
           });
 
-          toggleFreeDaysCheckbox.addEventListener("change", function () {
-            showFreeDays = this.checked;
-            console.log("Show free days:", showFreeDays);
+        toggleFreeDaysCheckbox.addEventListener("change", function () {
+          showFreeDays = this.checked;
+          if (showFreeDays) {
+            loadWeekWithFreeDays(currentPage);
+          } else {
             loadEvents(filterSelect.value, null, currentPage);
-          });
+          }
+          console.log("FreeDays checkbox clicked. Checked:", this.checked);
+          console.log("Show free days:", showFreeDays);
+          // For Singularity: but not working loadEvents(filterSelect.value, null, currentPage);
+        });
 
         document
           .getElementById("exportCSV")

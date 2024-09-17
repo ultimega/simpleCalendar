@@ -586,9 +586,9 @@
               Show Free Days
             </label>
           </div>
-        </div>        
+        </div>
 
-      <!-- Will be taken OUT -->
+        <!-- Being Taken OUT -->
         <div class="control-section">
           <h3>Will be implemented elsewhere</h3>
           <div class="button-group">
@@ -698,7 +698,7 @@
         const prevRangeButton = document.getElementById("prevRange");
         const nextRangeButton = document.getElementById("nextRange");
         const currentRangeSpan = document.getElementById("currentRange");
-        const toggleFreeDaysButton = document.getElementById("toggleFreeDays");
+        const toggleFreeDaysCheckbox = document.getElementById("toggleFreeDays");
         const calendarContainer = document.querySelector(".calendar-container");
         const tableContainer = document.querySelector(".table-container");
 
@@ -706,6 +706,7 @@
           document.getElementById("currentWeekRange");
         const calendarGrid = document.getElementById("calendarGrid");
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+
 
         let selectedEvents = new Set();
         let lastSelectedIndex = null;
@@ -771,6 +772,33 @@
             });
           }
 
+          // Create an array of all days in the week
+          const allDaysInWeek = [];
+          for (
+            let d = new Date(startOfWeek);
+            d <= endOfWeek;
+            d.setDate(d.getDate() + 1)
+          ) {
+            allDaysInWeek.push(new Date(d));
+          }
+
+          // Filter events for the week and add free days
+          filteredEvents = allDaysInWeek.map((day) => {
+            const existingEvent = events.find(
+              (event) =>
+                new Date(event.date).toDateString() === day.toDateString()
+            );
+            if (existingEvent) {
+              return existingEvent;
+            } else {
+              return {
+                name: "Free",
+                date: day.toISOString().split("T")[0],
+                time: "--:--",
+              };
+            }
+          });
+
           if (searchParams) {
             filteredEvents = filteredEvents.filter((event) => {
               const searchTerm = searchParams.searchTerm.toLowerCase();
@@ -798,6 +826,7 @@
           paginatedEvents.forEach((event, index) => {
             const row = tbody.insertRow();
             const globalIndex = startIndex + index;
+            const isFreeDay = event.name === "Free";
             row.innerHTML = `
               <td><input type="checkbox" ${
                 selectedEvents.has(globalIndex) ? "checked" : ""
@@ -812,11 +841,17 @@
             if (globalIndex === lastSelectedIndex) {
               row.classList.add("last-selected");
             }
-            row
-              .querySelector('input[type="checkbox"]')
-              .addEventListener("change", function () {
-                toggleEventSelection(this, globalIndex);
-              });
+            if (isFreeDay){
+              row.classList.add("free-day")
+            }
+            if (!isFreeDay){
+              row
+                .querySelector('input[type="checkbos"]')
+                .addEventListener("change", function(){
+                  toggleEventSelection(this,globalIndex);
+                })
+            };
+            
           });
 
           updatePagination(filteredEvents.length, page);
@@ -1143,8 +1178,9 @@
             }
           });
 
-        toggleFreeDaysButton.addEventListener("click", function () {
-          showFreeDays = !showFreeDays;
+        toggleFreeDaysCheckbox.addEventListener("change", function () {
+          //showFreeDays = !showFreeDays; for buttons= toggling
+          showFreeDays = this.checked;
           loadEvents(filterSelect.value, null, currentPage);
         });
 

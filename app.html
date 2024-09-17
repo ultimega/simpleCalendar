@@ -446,7 +446,6 @@
           align-items: stretch;
         }
 
-
         #prevWeek,
         #nextWeek {
           max-width: 100%;
@@ -578,6 +577,37 @@
             </select>
           </div>
         </div>
+
+
+        <div class="control-section">
+          <h3>Batch Operations</h3>
+          <div class="button-group">
+            <button id="selectAll" type="button" class="tooltip">
+              Select All
+              <span class="tooltiptext">Select all visible events</span>
+            </button>
+            <button id="selectBetween" type="button" class="tooltip">
+              Select Between
+              <span class="tooltiptext"
+                >Select events between two selected events</span
+              >
+            </button>
+            <button id="toggleFreeDays" type="button" class="tooltip">
+              Toggle FreeDays
+              <span class="tooltiptext">Show/Hide days without events</span>
+            </button>
+            <button type="button" id="exportCSV">Export as CSV</button>
+            <div>
+              <label for="loadCSV">Load CSV:</label>
+              <input
+                type="file"
+                id="loadCSV"
+                placeholder="Choose a CSV file"
+                accept=".csv"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="content-container">
@@ -633,39 +663,6 @@
           </div>
         </div>
       </div>
-
-      <!-- To Reverse the pop-up -->
-      <button class="batch-popup-trigger" id="batchPopupTrigger">B</button>
-
-      <div class="batch-popup" id="batchPopup">
-        <h3>Batch Operations</h3>
-        <div class="button-group">
-          <button id="selectAll" type="button" class="tooltip">
-            Select All
-            <span class="tooltiptext">Select all visible events</span>
-          </button>
-          <button id="selectBetween" type="button" class="tooltip">
-            Select Between
-            <span class="tooltiptext"
-              >Select events between two selected events</span
-            >
-          </button>
-          <button id="toggleFreeDays" type="button" class="tooltip">
-            Toggle FreeDays
-            <span class="tooltiptext">Show/Hide days without events</span>
-          </button>
-          <button type="button" id="exportCSV">Export as CSV</button>
-          <div>
-            <label for="loadCSV">Load CSV:</label>
-            <input
-              type="file"
-              id="loadCSV"
-              placeholder="Choose a CSV file"
-              accept=".csv"
-            />
-          </div>
-        </div>
-      </div>
     </div>
 
     <script>
@@ -699,11 +696,10 @@
         const calendarContainer = document.querySelector(".calendar-container");
         const tableContainer = document.querySelector(".table-container");
 
-        const currentWeekRangeSpan =          document.getElementById("currentWeekRange");
+        const currentWeekRangeSpan =
+          document.getElementById("currentWeekRange");
         const calendarGrid = document.getElementById("calendarGrid");
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
-        const batchPopupTrigger = document.getElementById("batchPopupTrigger");
-        const batchPopup = document.getElementById("batchPopup");
 
         let selectedEvents = new Set();
         let lastSelectedIndex = null;
@@ -826,8 +822,6 @@
           } else {
             noEventsFoundMessage.style.display = "none";
           }
-
-          
         }
 
         function updatePagination(totalEvents, currentPage) {
@@ -979,7 +973,7 @@
 
           localStorage.setItem("events", JSON.stringify(events));
           loadEvents(filterSelect.value, null, currentPage);
-          
+
           form.reset();
           editIndexField.value = "";
           selectedEvents.clear();
@@ -991,8 +985,6 @@
 
           eventNameField.focus();
         });
-
-
 
         filterSelect.addEventListener("change", function () {
           loadEvents(this.value, null, 1);
@@ -1127,7 +1119,7 @@
               );
               localStorage.setItem("events", JSON.stringify(newEvents));
               loadEvents(filterSelect.value, null, 1);
-              
+
               selectedEvents.clear();
               lastSelectedIndex = null;
               form.reset();
@@ -1199,27 +1191,12 @@
               localStorage.setItem("events", JSON.stringify(events));
 
               loadEvents(filterSelect.value, null, 1);
-              
 
               event.target.value = "";
             };
 
             reader.readAsText(file);
           });
-
-        batchPopupTrigger.addEventListener("click", () => {
-          batchPopup.classList.toggle("show");
-        });
-
-        // Close popup when clicking outside
-        document.addEventListener("click", (event) => {
-          if (
-            !batchPopup.contains(event.target) &&
-            event.target !== batchPopupTrigger
-          ) {
-            batchPopup.classList.remove("show");
-          }
-        });
 
         Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
           if (index > 0) {

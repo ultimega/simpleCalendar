@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Manager</title>
+    <title>Event Manager</title>
     <style>
       * {
         box-sizing: border-box;
@@ -524,6 +525,7 @@
         width: 100%;
       }
     </style>
+    <!-- TODO: Clean Styles -->
   </head>
   <body>
     <div class="app-container">
@@ -578,6 +580,43 @@
             </select>
           </div>
         </div>
+
+        <div class="control-section">
+          <h3>View Options</h3>
+          <div class="button-group">
+            <label for="toggleFreeDays">
+              <input type="checkbox" id="toggleFreeDays" />
+              Show Free Days
+            </label>
+          </div>
+        </div>
+
+        <!-- Being Taken OUT -->
+        <div class="control-section">
+          <h3>Will be implemented elsewhere</h3>
+          <div class="button-group">
+            <button id="selectAll" type="button" class="tooltip">
+              Select All
+              <span class="tooltiptext">Select all visible events</span>
+            </button>
+            <button id="selectBetween" type="button" class="tooltip">
+              Select Between
+              <span class="tooltiptext"
+                >Select events between two selected events</span
+              >
+            </button>
+            <button type="button" id="exportCSV">Export as CSV</button>
+            <div>
+              <label for="loadCSV">Load CSV:</label>
+              <input
+                type="file"
+                id="loadCSV"
+                placeholder="Choose a CSV file"
+                accept=".csv"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="content-container">
@@ -630,39 +669,6 @@
           </div>
           <div id="noEventsFound">
             No events found matching your search criteria.
-          </div>
-        </div>
-      </div>
-
-      <!-- To Reverse the pop-up -->
-      <button class="batch-popup-trigger" id="batchPopupTrigger">B</button>
-
-      <div class="batch-popup" id="batchPopup">
-        <h3>Batch Operations</h3>
-        <div class="button-group">
-          <button id="selectAll" type="button" class="tooltip">
-            Select All
-            <span class="tooltiptext">Select all visible events</span>
-          </button>
-          <button id="selectBetween" type="button" class="tooltip">
-            Select Between
-            <span class="tooltiptext"
-              >Select events between two selected events</span
-            >
-          </button>
-          <button id="toggleFreeDays" type="button" class="tooltip">
-            Toggle FreeDays
-            <span class="tooltiptext">Show/Hide days without events</span>
-          </button>
-          <button type="button" id="exportCSV">Export as CSV</button>
-          <div>
-            <label for="loadCSV">Load CSV:</label>
-            <input
-              type="file"
-              id="loadCSV"
-              placeholder="Choose a CSV file"
-              accept=".csv"
-            />
           </div>
         </div>
       </div>
@@ -721,7 +727,8 @@
         const prevRangeButton = document.getElementById("prevRange");
         const nextRangeButton = document.getElementById("nextRange");
         const currentRangeSpan = document.getElementById("currentRange");
-        const toggleFreeDaysButton = document.getElementById("toggleFreeDays");
+        const toggleFreeDaysCheckbox =
+          document.getElementById("toggleFreeDays");
         const calendarContainer = document.querySelector(".calendar-container");
         const tableContainer = document.querySelector(".table-container");
 
@@ -729,8 +736,11 @@
           document.getElementById("currentWeekRange");
         const calendarGrid = document.getElementById("calendarGrid");
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
-        const batchPopupTrigger = document.getElementById("batchPopupTrigger");
-        const batchPopup = document.getElementById("batchPopup");
+
+        //FOR LOADING FREE WEEKS
+        const WEEKS_BEFORE = 8;
+        const WEEKS_AFTER = 1;
+        const DAYS_IN_WEEK = 7;
 
         let selectedEvents = new Set();
         let lastSelectedIndex = null;
@@ -747,6 +757,7 @@
         currentWeekStart.setDate(
           currentWeekStart.getDate() - currentWeekStart.getDay()
         );
+        let allEventsWithFreeDays = [];
 
         function formatDate(date, includeYear = true) {
           const options = {
@@ -779,70 +790,106 @@
         }
 
         function loadEvents(filter = "all", searchParams = null, page = 1) {
-          const events = JSON.parse(localStorage.getItem("events")) || []; //DataHouse DataPush
+          const events = JSON.parse(localStorage.getItem("events")) || [];
           let filteredEvents = events;
 
+          const today = new Date();
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() - today.getDay());
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+          console.log(
+            "Week range:",
+            startOfWeek.toDateString(),
+            "to",
+            endOfWeek.toDateString()
+          );
+
           if (filter === "week") {
-            const today = new Date();
-            const startOfWeek = new Date(
-              today.setDate(today.getDate() - today.getDay())
-            );
-            const endOfWeek = new Date(
-              today.setDate(today.getDate() - today.getDay() + 6)
-            );
-            filteredEvents = events.filter((event) => {
-              const eventDate = new Date(event.date);
-              return eventDate >= startOfWeek && eventDate <= endOfWeek;
-            });
+            for (
+              let d = new Date(startOfWeek);
+              d <= endOfWeek;
+              d.setDate(d.getDate() + 1)
+            ) {
+              const currentDate = new Date(d);
+              const existingEvent = events.find(
+                (event) =>
+                  new Date(event.date).toDateString() ===
+                  currentDate.toDateString()
+              );
+
+              if (existingEvent) {
+                filteredEvents.push(existingEvent);
+              } else if (showFreeDays) {
+                filteredEvents.push({
+                  name: "Free",
+                  date: currentDate.toISOString().split("T")[0],
+                  time: "--:--",
+                });
+              }
+            }
+          } else {
+            filteredEvents = events;
           }
 
           if (searchParams) {
+            const { searchTerm, start, end } = searchParams;
             filteredEvents = filteredEvents.filter((event) => {
-              const searchTerm = searchParams.searchTerm.toLowerCase();
               const eventDate = new Date(event.date);
-              const matchesTerm =
-                event.name.toLowerCase().includes(searchTerm) ||
-                event.date.includes(searchTerm) ||
-                event.time.includes(searchTerm) ||
-                eventDate
-                  .toLocaleString("default", { month: "long" })
-                  .toLowerCase()
-                  .includes(searchTerm);
-              const matchesDate =
-                (!searchParams.start || event.date >= searchParams.start) &&
-                (!searchParams.end || event.date <= searchParams.end);
-              return matchesTerm && matchesDate;
+              const matchesTerm = searchTerm
+                ? event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  event.date.includes(searchTerm) ||
+                  event.time.includes(searchTerm) ||
+                  eventDate
+                    .toLocaleString("default", { month: "long" })
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+                : true;
+              const matchesDateRange =
+                (!start || event.date >= start) && (!end || event.date <= end);
+              return matchesTerm && matchesDateRange;
             });
           }
 
-          tbody.innerHTML = "";
+          console.log("Filtered events:", filteredEvents);
+
           const startIndex = (page - 1) * eventsPerPage;
           const endIndex = startIndex + eventsPerPage;
           const paginatedEvents = filteredEvents.slice(startIndex, endIndex);
 
+          console.log("Paginated events:", paginatedEvents);
+
+          tbody.innerHTML = "";
           paginatedEvents.forEach((event, index) => {
             const row = tbody.insertRow();
             const globalIndex = startIndex + index;
+            const isFreeDay = event.name === "Free";
+
             row.innerHTML = `
               <td><input type="checkbox" ${
                 selectedEvents.has(globalIndex) ? "checked" : ""
-              } /></td>
+              } ${isFreeDay ? "disabled" : ""} /></td>
               <td>${formatDate(event.date)}</td>
               <td>${event.time}</td>
               <td>${event.name}</td>
             `;
-            if (selectedEvents.has(globalIndex)) {
-              row.classList.add("selected");
-            }
-            if (globalIndex === lastSelectedIndex) {
+
+            if (selectedEvents.has(globalIndex)) row.classList.add("selected");
+            if (globalIndex === lastSelectedIndex)
               row.classList.add("last-selected");
+            if (isFreeDay) row.classList.add("free-day");
+
+            if (!isFreeDay) {
+              row
+                .querySelector('input[type="checkbox"]')
+                .addEventListener("change", function () {
+                  toggleEventSelection(this, globalIndex);
+                });
             }
-            row
-              .querySelector('input[type="checkbox"]')
-              .addEventListener("change", function () {
-                toggleEventSelection(this, globalIndex);
-              });
           });
+
+          console.log("Table rows:", tbody.innerHTML);
 
           updatePagination(filteredEvents.length, page);
           sortTable(currentSortColumn, currentSortDirection);
@@ -853,6 +900,8 @@
           } else {
             noEventsFoundMessage.style.display = "none";
           }
+
+          
         }
 
         function updatePagination(totalEvents, currentPage) {
@@ -959,7 +1008,6 @@
           currentSortDirection = direction;
         }
 
-        //not working as expected
         function dynamicSelectAll() {
           const checkboxes = tbody.querySelectorAll('input[type="checkbox"]');
           const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
@@ -1003,8 +1051,6 @@
           }
 
           localStorage.setItem("events", JSON.stringify(events));
-          console.log(JSON.stringify(events)); //DataHouse //Check data being stored
-
           loadEvents(filterSelect.value, null, currentPage);
 
           form.reset();
@@ -1040,19 +1086,28 @@
           loadEvents(filterSelect.value, null, 1);
         });
 
+        // Update the event listeners for pagination buttons
         prevPageButton.addEventListener("click", function () {
           if (currentPage > 1) {
             currentPage--;
-            loadEvents(filterSelect.value, null, currentPage);
+            if (showFreeDays) {
+              loadWeeksWithFreeDays(currentPage);
+            } else {
+              loadEvents(filterSelect.value, null, currentPage);
+            }
           }
         });
 
         nextPageButton.addEventListener("click", function () {
-          const events = JSON.parse(localStorage.getItem("events")) || [];
+          const events = showFreeDays ? allEventsWithFreeDays : (JSON.parse(localStorage.getItem("events")) || []);
           const totalPages = Math.ceil(events.length / eventsPerPage);
           if (currentPage < totalPages) {
             currentPage++;
-            loadEvents(filterSelect.value, null, currentPage);
+            if (showFreeDays) {
+              loadWeeksWithFreeDays(currentPage);
+            } else {
+              loadEvents(filterSelect.value, null, currentPage);
+            }
           }
         });
 
@@ -1170,10 +1225,15 @@
             }
           });
 
-        toggleFreeDaysButton.addEventListener("click", function () {
-          showFreeDays = !showFreeDays;
-          loadEvents(filterSelect.value, null, currentPage);
-        });
+          toggleFreeDaysCheckbox.addEventListener("change", function () {
+            showFreeDays = this.checked;
+            currentPage = 1; // Reset to first page when toggling
+            if (showFreeDays) {
+              loadWeeksWithFreeDays(currentPage);
+            } else {
+              loadEvents(filterSelect.value, null, currentPage);
+            }
+          });
 
         document
           .getElementById("exportCSV")
@@ -1230,20 +1290,6 @@
 
             reader.readAsText(file);
           });
-
-        batchPopupTrigger.addEventListener("click", () => {
-          batchPopup.classList.toggle("show");
-        });
-
-        // Close popup when clicking outside
-        document.addEventListener("click", (event) => {
-          if (
-            !batchPopup.contains(event.target) &&
-            event.target !== batchPopupTrigger
-          ) {
-            batchPopup.classList.remove("show");
-          }
-        });
 
         Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
           if (index > 0) {

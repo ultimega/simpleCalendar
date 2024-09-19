@@ -1,4 +1,50 @@
+## TO DO
+1. Mobile App (v1 didn't respond to the screen size, need to adjest container styles)
+2. Online Storage
+   - Check local storage application properly
+   - Explore possiblity of some Array for storing each events details agains a day(key in dict) 
+   - 
+4. Single Page with  Batch Section Horizontally arranged directly on top of the table-tainer. 
+   - no pop up...straight forward display at right top. on top of the table-container.
+   - flex entire app-container to re-adjust.
+   - On mobile, the table-container should be at the top of the INPUT when responing , especially for a more portrait display
+
+
+3. Single List View For All Functionality
+   - Use Radio Button to select showing freedays for the week or not  
+5. Take Out
+   - Calendar View
+   - Sorting(and it's arrows). Data should be arranged in chronological order by default
+   - Stored data should be sorted and the load event function calls the necessary events
+   - 
+6. General
+   - 
+   - 
+
+
+
+
+
+
+
+
+- add show : current events only, past events only, future events only
+
 # Done
+- One Navigation Style, Scrolling(ListView) and Pagination(Calendar View)
+
+- Good interaction Feedback checks and implementation
+- 
+- Select ALl and select between should work as one Big checkbox at the select column header. (b/n didn't)
+
+- By default, the calendar view should have the year displayed on top while taken out of the event name in the shown events
+
+- chosen Dates in Search and Filter should be linked to the events shown in the calendar
+
+- Re-Work On search and filter...should be automatic and across all fields not needing the user to type in the field.
+
+DONE - Enable Pagination for the month's weeks. this should be successive into another month effecting a change of the year and month displayed at the top of the calendar
+
 - UI(significant): Updated Control Panel Section Layout  :Done
     - 3 sections for the control panel : Input, Read and Batch.
     - For the Input Section, From the Add Event text to the Time Section with the Add Event button and Delete button.
@@ -19,23 +65,6 @@ CRITICAL BUG CAUGHT AND Fixed - took majority of dev time:
 	- After investigating, the bugs were present since the pagination option and range view commit
 	- the solution was to update indexes and implement a refresh mechanism in the current head...making the application more functional
 
-
-## TO DO
-
-- 
-- CurrentRange and previous range buttons should be selectable data fields 
-- In the Calendar View, the Year and Month should be displayed on top of the calendar
-- Enable Pagination for the month's weeks. this should be successive into another month effecting a change of the year and month displayed at the top of the calendar
-
-- Re-Work On search and filter...should be automatic and across all fields not needing the user to type in the field.
-- chosen Dates in Search and Filter should be linked to the events shown in the calendar
-- By default, the calendar view should have the year displayed on top while taken out of the event name in the shown events
-
-- Select ALl and select between should work as one Big checkbox at the select column header
-
-- Good interaction Feedback checks and implementation
-- One Navigation Style, Scrolling(ListView) and Pagination(Calendar View)
-- add show : current events only, past events only, future events only
 
 ## DOING
 DONE- Indpendent Calendar view (on new branch) with same function defnitions and capabilites.

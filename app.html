@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Manager</title>
-    <title>Event Manager</title>
     <style>
       * {
         box-sizing: border-box;
@@ -45,7 +44,6 @@
         display: flex;
         flex-direction: column;
         margin-right: 1px;
-        max-height: 100vh;
       }
 
       .form-container:hover {
@@ -674,33 +672,7 @@
       </div>
     </div>
 
-<script type="module">
-
-  //FIREBASE 
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyAFKQ-g5-ZivxHQ3y3KW9JoHVwTzNQmLB4",
-    authDomain: "simple-calendar-ultimega.firebaseapp.com",
-    projectId: "simple-calendar-ultimega",
-    storageBucket: "simple-calendar-ultimega.appspot.com",
-    messagingSenderId: "610639720462",
-    appId: "1:610639720462:web:cef59ff4d3479fc7090c5f",
-    measurementId: "G-RJWHRX0R13"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  
-
-
+    <script>
       document.addEventListener("DOMContentLoaded", (event) => {
         const form = document.getElementById("eventForm");
         const table = document.getElementById("eventTable");
@@ -790,8 +762,17 @@
         }
 
         function loadEvents(filter = "all", searchParams = null, page = 1) {
+          console.log(
+            "Loading events. Filter:",
+            filter,
+            "Show free days:",
+            showFreeDays,
+            "Page:",
+            page
+          );
+
           const events = JSON.parse(localStorage.getItem("events")) || [];
-          let filteredEvents = events;
+          let filteredEvents = [];
 
           const today = new Date();
           const startOfWeek = new Date(today);
@@ -895,13 +876,86 @@
           sortTable(currentSortColumn, currentSortDirection);
           updateDeleteButtonState();
 
-          if (filteredEvents.length === 0) {
-            noEventsFoundMessage.style.display = "block";
-          } else {
-            noEventsFoundMessage.style.display = "none";
+          noEventsFoundMessage.style.display =
+            filteredEvents.length === 0 ? "block" : "none";
+        }
+
+        function loadWeeksWithFreeDays(page = 1) {
+          const events = JSON.parse(localStorage.getItem("events")) || [];
+
+          const earliestDate = new Date(
+            Math.min(...events.map((e) => new Date(e.date)))
+          );
+          const startDate = new Date(earliestDate);
+          startDate.setDate(startDate.getDate() - WEEKS_BEFORE * DAYS_IN_WEEK);
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + WEEKS_AFTER * DAYS_IN_WEEK);
+
+          let allDates = [];
+          for (
+            let d = new Date(startDate);
+            d <= endDate;
+            d.setDate(d.getDate() + 1)
+          ) {
+            allDates.push(new Date(d));
           }
 
-          
+          allEventsWithFreeDays = allDates.map((date) => {
+            const existingEvent = events.find(
+              (event) =>
+                new Date(event.date).toDateString() === date.toDateString()
+            );
+            return (
+              existingEvent || {
+                name: "Free",
+                date: date.toISOString().split("T")[0],
+                time: "--:--",
+              }
+            );
+          });
+
+          const startIndex = (page - 1) * eventsPerPage;
+          const endIndex = startIndex + eventsPerPage;
+          const paginatedEvents = allEventsWithFreeDays.slice(
+            startIndex,
+            endIndex
+          );
+
+          renderEvents(paginatedEvents, startIndex);
+          updatePagination(allEventsWithFreeDays.length, page);
+          sortTable(currentSortColumn, currentSortDirection);
+          updateDeleteButtonState();
+        }
+
+        function renderEvents(events, startIndex) {
+          tbody.innerHTML = "";
+          events.forEach((event, index) => {
+            const row = tbody.insertRow();
+            const globalIndex = startIndex + index;
+            const isFreeDay = event.name === "Free";
+
+            row.innerHTML = `
+              <td><input type="checkbox" ${
+                selectedEvents.has(globalIndex) ? "checked" : ""
+              } ${isFreeDay ? "disabled" : ""} /></td>
+              <td>${formatDate(event.date)}</td>
+              <td>${event.time}</td>
+              <td>${event.name}</td>
+            `;
+
+            if (selectedEvents.has(globalIndex)) row.classList.add("selected");
+            if (globalIndex === lastSelectedIndex)
+              row.classList.add("last-selected");
+            if (isFreeDay) row.classList.add("free-day");
+
+            if (!isFreeDay) {
+              row
+                .querySelector('input[type="checkbox"]')
+                .addEventListener("change", function () {
+                  toggleEventSelection(this, globalIndex);
+                });
+            }
+          });
         }
 
         function updatePagination(totalEvents, currentPage) {
@@ -1038,7 +1092,7 @@
           const eventTime = eventTimeField.value;
           const editIndex = editIndexField.value;
 
-          const events = JSON.parse(localStorage.getItem("events")) || []; // firebase.database().ref('events').once('value')
+          const events = JSON.parse(localStorage.getItem("events")) || [];
 
           if (editIndex === "") {
             events.push({ name: eventName, date: eventDate, time: eventTime });
@@ -1051,6 +1105,8 @@
           }
 
           localStorage.setItem("events", JSON.stringify(events));
+          console.log("Saved events:", JSON.stringify(events));
+
           loadEvents(filterSelect.value, null, currentPage);
 
           form.reset();
@@ -1309,7 +1365,7 @@
         eventDateField.value = now.toISOString().split("T")[0];
         eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
         loadEvents();
-        tableContainer.style.display = ""; // can set to block, flex or flexbox(vertical NavBars)
+        tableContainer.style.display = "block";
         document.getElementById("eventName").focus();
       });
     </script>

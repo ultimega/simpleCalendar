@@ -589,32 +589,20 @@
           </div>
         </div>
 
-        <!-- Being Taken OUT -->
-        <div class="control-section">
-          <h3>Will be implemented elsewhere</h3>
+        
           <div class="button-group">
-            <button id="selectAll" type="button" class="tooltip">
+            <button id="selectAll" type="button" class="tooltip" style="display: none">
               Select All
               <span class="tooltiptext">Select all visible events</span>
             </button>
-            <button id="selectBetween" type="button" class="tooltip">
+            <button id="selectBetween" type="button" class="tooltip" style="display: none">
               Select Between
               <span class="tooltiptext"
                 >Select events between two selected events</span
               >
             </button>
-            <button type="button" id="exportCSV">Export as CSV</button>
-            <div>
-              <label for="loadCSV">Load CSV:</label>
-              <input
-                type="file"
-                id="loadCSV"
-                placeholder="Choose a CSV file"
-                accept=".csv"
-              />
-            </div>
           </div>
-        </div>
+        
       </div>
 
       <div class="content-container">
@@ -1293,62 +1281,6 @@
             loadEvents(filterSelect.value, null, currentPage);
           }
         });
-
-        document
-          .getElementById("exportCSV")
-          .addEventListener("click", function () {
-            // const events = JSON.parse(localStorage.getItem("events")) || [];
-            let csvContent =
-              "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
-
-            allEvents.forEach((event) => {
-              const row = `${event.name},${event.date},${event.time}`;
-              csvContent += row + "\n";
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "events.csv");
-            document.body.appendChild(link);
-
-            link.click();
-            document.body.removeChild(link);
-          });
-
-        document
-          .getElementById("loadCSV")
-          .addEventListener("change", function (event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-              const content = e.target.result;
-              const lines = content.split("\n");
-
-              allEvents = events;
-
-              for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (line) {
-                  const [name, date, time] = line.split(",");
-                  events.push({
-                    name: name.trim(),
-                    date: date.trim(),
-                    time: time.trim(),
-                  });
-                }
-              }
-
-              localStorage.setItem("events", JSON.stringify(allEvents));
-
-              loadEvents(filterSelect.value, null, 1);
-
-              event.target.value = "";
-            };
-
-            reader.readAsText(file);
-          });
 
         Array.from(table.tHead.rows[0].cells).forEach((th, index) => {
           if (index > 0) {

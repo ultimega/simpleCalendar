@@ -217,7 +217,7 @@
       }
 
       .last-selected {
-        background-color: #cce5ff;
+        background-color: #ccffdc;
       }
 
       .table-container {
@@ -573,8 +573,8 @@
 
           <div class="filter-options">
             <select id="filterSelect">
-              <option value="all">All Events</option>
-              <option value="week">Events This Week</option>
+              <option value="all">All Events - Deprecated</option>
+              <option value="week">Events This Week - Deprecated</option>
             </select>
           </div>
         </div>
@@ -674,6 +674,7 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", (event) => {
+        //Variables
         const form = document.getElementById("eventForm");
         const table = document.getElementById("eventTable");
         const tbody = table.getElementsByTagName("tbody")[0];
@@ -710,7 +711,7 @@
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
 
         //FOR LOADING FREE WEEKS
-        const WEEKS_BEFORE = 8;
+        const WEEKS_BEFORE = 1;
         const WEEKS_AFTER = 1;
         const DAYS_IN_WEEK = 7;
 
@@ -730,6 +731,7 @@
           currentWeekStart.getDate() - currentWeekStart.getDay()
         );
         let allEventsWithFreeDays = [];
+        let allEvents = JSON.parse(localStorage.getItem("events")) || [];
 
         function formatDate(date, includeYear = true) {
           const options = {
@@ -771,7 +773,7 @@
             page
           );
 
-          const events = JSON.parse(localStorage.getItem("events")) || [];
+          // const events = allEvents;
           let filteredEvents = [];
 
           const today = new Date();
@@ -811,7 +813,7 @@
               }
             }
           } else {
-            filteredEvents = events;
+            filteredEvents = allEvents;
           }
 
           if (searchParams) {
@@ -983,8 +985,7 @@
           updateLastSelected();
           updateDeleteButtonState();
 
-          const events = JSON.parse(localStorage.getItem("events")) || [];
-          const event = events[index];
+          const event = allEvents[index];
           if (event) {
             eventNameField.value = event.name;
             eventDateField.value = event.date;
@@ -1013,8 +1014,7 @@
         }
 
         function editEvent(event) {
-          const events = JSON.parse(localStorage.getItem("events")) || [];
-          const index = events.findIndex(
+          const index = allEvents.findIndex(
             (e) =>
               e.date === event.date &&
               e.time === event.time &&
@@ -1092,20 +1092,22 @@
           const eventTime = eventTimeField.value;
           const editIndex = editIndexField.value;
 
-          const events = JSON.parse(localStorage.getItem("events")) || [];
-
           if (editIndex === "") {
-            events.push({ name: eventName, date: eventDate, time: eventTime });
+            allEvents.push({
+              name: eventName,
+              date: eventDate,
+              time: eventTime,
+            });
           } else {
-            events[editIndex] = {
+            allEvents[editIndex] = {
               name: eventName,
               date: eventDate,
               time: eventTime,
             };
           }
 
-          localStorage.setItem("events", JSON.stringify(events));
-          console.log("Saved events:", JSON.stringify(events));
+          localStorage.setItem("events", JSON.stringify(allEvents)); //New Global allEvents variable
+          console.log("Current Events:", JSON.stringify(allEvents));
 
           loadEvents(filterSelect.value, null, currentPage);
 
@@ -1142,7 +1144,7 @@
           loadEvents(filterSelect.value, null, 1);
         });
 
-        // Update the event listeners for pagination buttons
+        // Event listeners for pagination buttons
         prevPageButton.addEventListener("click", function () {
           if (currentPage > 1) {
             currentPage--;
@@ -1155,7 +1157,9 @@
         });
 
         nextPageButton.addEventListener("click", function () {
-          const events = showFreeDays ? allEventsWithFreeDays : (JSON.parse(localStorage.getItem("events")) || []);
+          const events = showFreeDays
+            ? allEventsWithFreeDays
+            : JSON.parse(localStorage.getItem("events")) || [];
           const totalPages = Math.ceil(events.length / eventsPerPage);
           if (currentPage < totalPages) {
             currentPage++;
@@ -1257,11 +1261,10 @@
           .getElementById("deleteSelected")
           .addEventListener("click", function () {
             if (selectedEvents.size > 0) {
-              const events = JSON.parse(localStorage.getItem("events")) || [];
-              const newEvents = events.filter(
+              allEvents = allEvents.filter(
                 (_, index) => !selectedEvents.has(index)
               );
-              localStorage.setItem("events", JSON.stringify(newEvents));
+              localStorage.setItem("events", JSON.stringify(allEvents));
               loadEvents(filterSelect.value, null, 1);
 
               selectedEvents.clear();
@@ -1281,24 +1284,24 @@
             }
           });
 
-          toggleFreeDaysCheckbox.addEventListener("change", function () {
-            showFreeDays = this.checked;
-            currentPage = 1; // Reset to first page when toggling
-            if (showFreeDays) {
-              loadWeeksWithFreeDays(currentPage);
-            } else {
-              loadEvents(filterSelect.value, null, currentPage);
-            }
-          });
+        toggleFreeDaysCheckbox.addEventListener("change", function () {
+          showFreeDays = this.checked;
+          currentPage = 1; // Reset to first page when toggling
+          if (showFreeDays) {
+            loadWeeksWithFreeDays(currentPage);
+          } else {
+            loadEvents(filterSelect.value, null, currentPage);
+          }
+        });
 
         document
           .getElementById("exportCSV")
           .addEventListener("click", function () {
-            const events = JSON.parse(localStorage.getItem("events")) || [];
+            // const events = JSON.parse(localStorage.getItem("events")) || [];
             let csvContent =
               "data:text/csv;charset=utf-8,Event Name,Date,Time\n";
 
-            events.forEach((event) => {
+            allEvents.forEach((event) => {
               const row = `${event.name},${event.date},${event.time}`;
               csvContent += row + "\n";
             });
@@ -1323,7 +1326,7 @@
               const content = e.target.result;
               const lines = content.split("\n");
 
-              const events = [];
+              allEvents = events;
 
               for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
@@ -1337,7 +1340,7 @@
                 }
               }
 
-              localStorage.setItem("events", JSON.stringify(events));
+              localStorage.setItem("events", JSON.stringify(allEvents));
 
               loadEvents(filterSelect.value, null, 1);
 

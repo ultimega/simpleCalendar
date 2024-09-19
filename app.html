@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Manager</title>
-
-    <!-- TODO: Clean Styles -->
     <style>
       * {
         box-sizing: border-box;
@@ -473,13 +471,8 @@
         flex-direction: column;
         gap: 8px;
       }
-
-      .batch-popup button,
-      .batch-popup input[type="file"] {
-        width: 100%;
-      }
     </style>
-  </head>
+      </head>
   <body>
     <div class="app-container">
       <div class="form-container">
@@ -663,11 +656,11 @@
           document.getElementById("currentWeekRange");
         const calendarGrid = document.getElementById("calendarGrid");
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
-        
+
         //FOR LOADING FREE WEEKS
-        const WEEKS_BEFORE = 8;
-        const WEEKS_AFTER = 8;
-        const DAYS_IN_WEEK = 7
+        const WEEKS_BEFORE = 1;
+        const WEEKS_AFTER = 1;
+        const DAYS_IN_WEEK = 7;
 
         let selectedEvents = new Set();
         let lastSelectedIndex = null;
@@ -685,7 +678,6 @@
           currentWeekStart.getDate() - currentWeekStart.getDay()
         );
         let allEventsWithFreeDays = [];
-
 
         function formatDate(date, includeYear = true) {
           const options = {
@@ -838,101 +830,88 @@
 
         function loadWeeksWithFreeDays(page = 1) {
           const events = JSON.parse(localStorage.getItem("events")) || [];
-          //WEEK_consts at top
 
-        /**  const today = new Date();
-          const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-          const endOfWeek = new Date(startOfWeek);
-          endOfWeek.setDate(startOfWeek.getDate() + 6);
-        **/
-        
-  
-        const earliestDate = new Date(Math.min(...events.map(e => new Date(e.date))));
-        const startDate = new Date(earliestDate);
-        startDate.setDate(startDate.getDate() - (WEEKS_BEFORE * DAYS_IN_WEEK));
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + (WEEKS_AFTER * DAYS_IN_WEEK));
-      
-        let allDates = [];
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-          allDates.push(new Date(d));
-        }
-      
-        let allEvents = allDates.map(date => {
-          const existingEvent = events.find(event => new Date(event.date).toDateString() === date.toDateString());
-          return existingEvent || {
-            name: "Free",
-            date: date.toISOString().split('T')[0],
-            time: "--:--"
-          };
-        });
-      
+          const earliestDate = new Date(
+            Math.min(...events.map((e) => new Date(e.date)))
+          );
+          const startDate = new Date(earliestDate);
+          startDate.setDate(startDate.getDate() - WEEKS_BEFORE * DAYS_IN_WEEK);
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + WEEKS_AFTER * DAYS_IN_WEEK);
 
-        const startIndex = (page - 1) * eventsPerPage;
-        const endIndex = startIndex + eventsPerPage;
-        allEventsWithFreeDays = allEvents;
-        const paginatedEvents = allEventsWithFreeDays.slice(startIndex, endIndex);
-    
-        tbody.innerHTML = "";
-        paginatedEvents.forEach((event, index) => {
-          const row = tbody.insertRow();
-          const globalIndex = startIndex + index;
-          const isFreeDay = event.name === "Free";
-          row.innerHTML = `
-            <td><input type="checkbox" ${selectedEvents.has(globalIndex) ? "checked" : ""} ${isFreeDay ? "disabled" : ""} /></td>
-            <td>${formatDate(event.date)}</td>
-            <td>${event.time}</td>
-            <td>${event.name}</td>
-          `;
-          if (selectedEvents.has(globalIndex)) row.classList.add("selected");
-          if (globalIndex === lastSelectedIndex) row.classList.add("last-selected");
-          if (isFreeDay) row.classList.add("free-day");
-          if (!isFreeDay) {
-            row.querySelector('input[type="checkbox"]').addEventListener("change", function() {
-              toggleEventSelection(this, globalIndex);
-            });
+          let allDates = [];
+          for (
+            let d = new Date(startDate);
+            d <= endDate;
+            d.setDate(d.getDate() + 1)
+          ) {
+            allDates.push(new Date(d));
           }
-        });
-      
-        updatePagination(allEventsWithFreeDays.length, page);
-        sortTable(currentSortColumn, currentSortDirection);
-        updateDeleteButtonState();
-      }
-        
+
+          allEventsWithFreeDays = allDates.map((date) => {
+            const existingEvent = events.find(
+              (event) =>
+                new Date(event.date).toDateString() === date.toDateString()
+            );
+            return (
+              existingEvent || {
+                name: "Free",
+                date: date.toISOString().split("T")[0],
+                time: "--:--",
+              }
+            );
+          });
+
+          const startIndex = (page - 1) * eventsPerPage;
+          const endIndex = startIndex + eventsPerPage;
+          const paginatedEvents = allEventsWithFreeDays.slice(
+            startIndex,
+            endIndex
+          );
+
+          renderEvents(paginatedEvents, startIndex);
+          updatePagination(allEventsWithFreeDays.length, page);
+          sortTable(currentSortColumn, currentSortDirection);
+          updateDeleteButtonState();
+        }
+
         function renderEvents(events, startIndex) {
           tbody.innerHTML = "";
           events.forEach((event, index) => {
             const row = tbody.insertRow();
             const globalIndex = startIndex + index;
             const isFreeDay = event.name === "Free";
-            
+
             row.innerHTML = `
-              <td><input type="checkbox" ${selectedEvents.has(globalIndex) ? "checked" : ""} ${isFreeDay ? "disabled" : ""} /></td>
+              <td><input type="checkbox" ${
+                selectedEvents.has(globalIndex) ? "checked" : ""
+              } ${isFreeDay ? "disabled" : ""} /></td>
               <td>${formatDate(event.date)}</td>
               <td>${event.time}</td>
               <td>${event.name}</td>
             `;
-            
+
             if (selectedEvents.has(globalIndex)) row.classList.add("selected");
-            if (globalIndex === lastSelectedIndex) row.classList.add("last-selected");
+            if (globalIndex === lastSelectedIndex)
+              row.classList.add("last-selected");
             if (isFreeDay) row.classList.add("free-day");
-            
+
             if (!isFreeDay) {
-              row.querySelector('input[type="checkbox"]').addEventListener("change", function() {
-                toggleEventSelection(this, globalIndex);
-              });
+              row
+                .querySelector('input[type="checkbox"]')
+                .addEventListener("change", function () {
+                  toggleEventSelection(this, globalIndex);
+                });
             }
           });
         }
-        
-
 
         function updatePagination(totalEvents, currentPage) {
           const totalPages = Math.ceil(totalEvents / eventsPerPage);
           pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
           prevPageButton.disabled = currentPage === 1;
           nextPageButton.disabled = currentPage === totalPages;
-        }        
+        }
 
         function updateDeleteButtonState() {
           document.getElementById("deleteSelected").disabled =
@@ -1111,11 +1090,12 @@
           loadEvents(filterSelect.value, null, 1);
         });
 
+        // Update the event listeners for pagination buttons
         prevPageButton.addEventListener("click", function () {
           if (currentPage > 1) {
             currentPage--;
             if (showFreeDays) {
-              loadWeekWithFreeDays(currentPage);
+              loadWeeksWithFreeDays(currentPage);
             } else {
               loadEvents(filterSelect.value, null, currentPage);
             }
@@ -1123,12 +1103,14 @@
         });
 
         nextPageButton.addEventListener("click", function () {
-          const events = showFreeDays ? allEventsWithFreeDays : (JSON.parse(localStorage.getItem("events")) || []);
+          const events = showFreeDays
+            ? allEventsWithFreeDays
+            : JSON.parse(localStorage.getItem("events")) || [];
           const totalPages = Math.ceil(events.length / eventsPerPage);
           if (currentPage < totalPages) {
             currentPage++;
             if (showFreeDays) {
-              loadWeekWithFreeDays(currentPage);
+              loadWeeksWithFreeDays(currentPage);
             } else {
               loadEvents(filterSelect.value, null, currentPage);
             }
@@ -1251,15 +1233,12 @@
 
         toggleFreeDaysCheckbox.addEventListener("change", function () {
           showFreeDays = this.checked;
+          currentPage = 1; // Reset to first page when toggling
           if (showFreeDays) {
             loadWeeksWithFreeDays(currentPage);
           } else {
             loadEvents(filterSelect.value, null, currentPage);
           }
-
-          console.log("FreeDays checkbox clicked. Checked:", this.checked);
-          console.log("Show free days:", showFreeDays);
-          // For Singularity(but not working): loadEvents(filterSelect.value, null, currentPage);
         });
 
         document

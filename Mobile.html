@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Event Manager App</title>
+    <title>Mobile Event Manager</title>
     <style>
+      /* <link rel="stylesheet" href="\Mstyles.css"> */
       * {
         box-sizing: border-box;
         margin: 0;
@@ -14,16 +15,18 @@
       body {
         font-family: Arial, sans-serif;
         display: flex;
+        flex-direction: column;
         min-height: 100vh;
         margin: 0;
-        padding: 0px;
-        overflow: hidden;
+        padding: 0;
+        overflow-x: hidden;
       }
 
       .app-container {
         display: flex;
+        flex-direction: column-reverse;
         width: 100%;
-        height: 100vh;
+        min-height: 100vh;
         margin: 0 auto;
         background-color: rgba(0, 0, 0, 0.684);
         border-radius: 15px;
@@ -32,42 +35,37 @@
       }
 
       .form-container {
-        width: 43%;
-        max-width: 400px;
+        width: 100%;
+        max-width: 100%;
         background-color: #ccc;
-        padding: 5px;
-        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
-        z-index: 1;
-        transform: translateZ(20px);
+        padding: 15px;
+        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        z-index: 2;
         transition: transform 0.3s ease;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        margin-right: 1px;
-      }
-
-      .form-container:hover {
-        transform: translateZ(30px);
+        position: sticky;
+        bottom: 0;
       }
 
       .content-container {
         flex: 1;
         display: flex;
         flex-direction: column;
-        padding: 20px;
+        padding: 15px;
         overflow-y: auto;
-        height: 100vh;
         background: #ffffff;
-        border-radius: 0px;
+        border-radius: 0;
       }
 
       h2,
       h3 {
-        margin-bottom: 20px;
-        font-size: 24px;
+        margin-bottom: 15px;
+        font-size: 20px;
         color: #333;
         border-bottom: 2px solid #e0e0e0;
-        padding-bottom: 10px;
+        padding-bottom: 8px;
         text-transform: uppercase;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
       }
@@ -75,12 +73,37 @@
       .control-section {
         background-color: #f8f9fa;
         border-radius: 8px;
-        padding: 12px 12px 12px 12px;
-        margin-block: 7px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        transform: translateZ(10px);
-        transition: transform 0.3s ease;
+        padding: 10px;
+        margin-block: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         border: 1px solid #2d2664;
+      }
+
+      @media (min-width: 768px) {
+        .form-container {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: space-between;
+        }
+
+        .control-section {
+          flex: 0 1 calc(50% - 10px);
+        }
+
+        .control-section:nth-child(3) {
+          flex: 0 1 auto;
+        }
+      }
+
+      @media (min-width: 1200px) {
+        .control-section {
+          flex: 0 1 calc(33.333% - 10px);
+        }
+
+        .control-section:nth-child(3) {
+          flex: 0 1 auto;
+        }
       }
 
       input[type="checkbox"] {
@@ -91,13 +114,9 @@
         top: -1px;
       }
 
-      .control-section:hover {
-        transform: translateZ(20px);
-      }
-
       .control-section h3 {
         margin-top: 0;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         font-size: 16px;
         color: #333;
         border-bottom: 0.5px solid #e0e0e0;
@@ -107,8 +126,8 @@
       input,
       select {
         width: 100%;
-        padding: 12px;
-        margin-bottom: 15px;
+        padding: 10px;
+        margin-bottom: 12px;
         border: 1px solid #ccc;
         border-radius: 6px;
         font-size: 16px;
@@ -128,14 +147,13 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        margin-top: 0px;
+        margin-top: 0;
         margin-bottom: 10px;
       }
 
       button,
       input[type="file"] {
         padding: 12px;
-
         background-color: #2d2664;
         color: white;
         border: none;
@@ -183,15 +201,15 @@
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         border-radius: 8px;
         overflow: hidden;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
       }
 
       th,
       td {
-        padding: 12px;
+        padding: 10px;
         text-align: left;
         border-bottom: 1px solid #655da2;
       }
@@ -299,11 +317,11 @@
       }
 
       .search-filter-container {
-        margin-top: 0px;
-        padding: 0px 0px 5px 5px;
+        margin-top: 0;
+        padding: 0 0 5px 5px;
         background-color: #f8f9fa;
         border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       .search-filter-container input,
@@ -339,7 +357,7 @@
       .filter-options {
         display: flex;
         justify-content: space-between;
-        margin: 0px;
+        margin: 0;
       }
 
       .view-options button,
@@ -376,7 +394,7 @@
       .batch-popup-trigger {
         position: fixed;
         bottom: 20px;
-        left: 20px;
+        right: 20px;
         background-color: #2d2664;
         color: white;
         border: none;
@@ -398,7 +416,7 @@
       .batch-popup {
         position: fixed;
         bottom: 90px;
-        left: 20px;
+        right: 20px;
         background-color: #ffffff;
         border-radius: 8px;
         padding: 20px;
@@ -433,18 +451,21 @@
 
       @media (max-width: 768px) {
         .app-container {
-          flex-direction: column;
-          height: auto;
+          flex-direction: column-reverse;
+          min-height: 100vh;
         }
 
         .form-container {
           width: 100%;
           max-width: 100%;
-          margin-bottom: 20px;
+          margin-bottom: 0;
+          position: sticky;
+          bottom: 0;
+          z-index: 2;
         }
 
         .content-container {
-          height: auto;
+          flex: 1;
           margin-left: 0;
           margin-right: 0;
         }
@@ -472,65 +493,13 @@
           margin: 0.5vw;
           font-size: 0.8rem;
         }
-      }
-      .batch-popup-trigger {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background-color: #2d2664;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        z-index: 1000;
-      }
 
-      .batch-popup-trigger:hover {
-        background-color: #655da2;
-        transform: scale(1.1);
-      }
-
-      .batch-popup {
-        position: fixed;
-        bottom: 90px;
-        left: 20px;
-        background-color: #ffffff;
-        border-radius: 8px;
-        padding: 18px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(20px);
-        transition: all 0.3s ease;
-      }
-
-      .batch-popup.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-      }
-
-      .batch-popup h3 {
-        margin-top: 0;
-      }
-
-      .batch-popup .button-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .batch-popup button,
-      .batch-popup input[type="file"] {
-        width: 100%;
+        .batch-popup {
+          padding: 12px;
+        }
       }
     </style>
+    <!-- <link rel="stylesheet" href="./Mstyles.css" /> -->
   </head>
   <body>
     <div class="app-container">

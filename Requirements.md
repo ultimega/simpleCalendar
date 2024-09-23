@@ -1,23 +1,27 @@
 ## TO DO
 1. Mobile App (v1 didn't respond to the screen size, need to adjest container styles)
+   - Will explore/use WebView-based mobile application next to maintain functionality
+   - using tools like Cordova(incomplete) or Capacitor(installed)
+  
 2. Online Storage
    - Check local storage application properly
    - Explore possiblity of some Array for storing each events details agains a day(key in dict) 
    - 
-4. Single Page with  Batch Section Horizontally arranged directly on top of the table-tainer. 
+3. Single Page with  Batch Section Horizontally arranged directly on top of the table-tainer. 
    - no pop up...straight forward display at right top. on top of the table-container.
    - flex entire app-container to re-adjust.
-   - On mobile, the table-container should be at the top of the INPUT when responing , especially for a more portrait display
+   -  the table-container should be at the top of the INPUT when responing , especially for a more portrait display like a mobile phone
 
 
 3. Single List View For All Functionality
    - Use Radio Button to select showing freedays for the week or not  
-5. Take Out
+         will be done outside batch section
+4. Take Out
    - Calendar View
    - Sorting(and it's arrows). Data should be arranged in chronological order by default
    - Stored data should be sorted and the load event function calls the necessary events
    - 
-6. General
+5. General
    - 
    - 
 

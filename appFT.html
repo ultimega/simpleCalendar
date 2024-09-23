@@ -4,7 +4,538 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Manager</title>
-    <link rel="stylesheet" href="\styles.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+          }
+          
+          body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0px;
+            overflow: hidden;
+          }
+          
+          .app-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            margin: 0 auto;
+            background-color: rgba(0, 0, 0, 0.684);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+          }
+          
+          .form-container {
+            width: 43%;
+            max-width: 400px;
+            background-color: #ccc;
+            padding: 5px;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            transform: translateZ(20px);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            margin-right: 1px;
+          }
+          
+          .form-container:hover {
+            transform: translateZ(30px);
+          }
+          
+          .content-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+            background: #ffffff;
+            border-radius: 0px;
+          }
+          
+          h2,
+          h3 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+          }
+          
+          .control-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 12px 12px 12px;
+            margin-block: 7px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transform: translateZ(10px);
+            transition: transform 0.3s ease;
+            border: 1px solid #2d2664;
+          }
+          
+          
+          input[type="checkbox"] {
+                  
+                          vertical-align: middle;
+                          margin: 0;
+                          padding: 0.1857rem;
+                          position: relative;
+                          top: -1px;
+                        }
+                  
+                
+          
+          
+          .control-section:hover {
+            transform: translateZ(20px);
+          }
+          
+          .control-section h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+            border-bottom: 0.5px solid #e0e0e0;
+            padding-bottom: 0.5px;
+          }
+          
+          input,
+          select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #f8f9fa;
+            box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+          }
+          
+          input:focus,
+          select:focus {
+            outline: none;
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(107, 93, 162, 0.5);
+          }
+          
+          .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 0px;
+            margin-bottom: 10px;
+          }
+          
+          button,
+          input[type="file"] {
+            padding: 12px;
+          
+            background-color: #2d2664;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1 0 calc(50% - 5px);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          
+          button:hover,
+          input[type="file"]:hover {
+            background-color: #655da2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+          }
+          
+          #submit:hover {
+            background-color: #3f994c;
+          }
+          
+          button:active,
+          input[type="file"]:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+          
+          button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.65;
+          }
+          
+          #deleteSelected {
+            background-color: #721c24;
+          }
+          
+          #deleteSelected:hover:not(:disabled) {
+            background-color: #e20909;
+          }
+          
+          table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+          }
+          
+          th,
+          td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #655da2;
+          }
+          
+          th {
+            background-color: #2d2664;
+            color: white;
+            cursor: pointer;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s ease;
+          }
+          
+          th:hover {
+            background-color: #2d2664e2;
+          }
+          
+          tbody tr:last-child td {
+            border-bottom: none;
+          }
+          
+          tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+          }
+          
+          tbody tr:hover {
+            background-color: #e9ecef;
+          }
+          
+          .selected {
+            background-color: #e7f5ff;
+          }
+          
+          .last-selected {
+            background-color: #ccffdc;
+          }
+          
+          .table-container {
+            background-color: #ffffff;
+          }
+          
+          .tooltip {
+            position: relative;
+            display: inline-block;
+          }
+          
+          .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+          }
+          
+          .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+          }
+          
+          .feedback {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            display: none;
+          }
+          
+          .feedback.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+          }
+          
+          .feedback.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+          }
+          
+          @keyframes fadeInOut {
+            0% {
+              opacity: 0;
+            }
+            10% {
+              opacity: 1;
+            }
+            90% {
+              opacity: 1;
+            }
+            100% {
+              opacity: 0;
+            }
+          }
+          
+          .feedback.show {
+            display: block;
+            animation: fadeInOut 3s ease-in-out;
+          }
+          
+          .search-filter-container {
+            margin-top: 0px;
+            padding: 0px 0px 5px 5px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          
+          .search-filter-container input,
+          .search-filter-container select {
+            margin-bottom: 10px;
+          }
+          
+          .search-filter-container .button-group {
+            justify-content: flex-start;
+          }
+          
+          input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+          }
+          
+          #noEventsFound {
+            display: none;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+          }
+          
+          .free-day {
+            background-color: #e6ffe6;
+          }
+          
+          .view-options,
+          .filter-options {
+            display: flex;
+            justify-content: space-between;
+            margin: 0px;
+          }
+          
+          .view-options button,
+          .filter-options button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #5d9aa2;
+            color: #fff;
+            transition: background-color 0.3s;
+          }
+          
+          .view-options button:hover,
+          .filter-options button:hover {
+            background-color: #5d9aa2;
+          }
+          
+          .view-options button:disabled,
+          .filter-options button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+          }
+          
+          #nextPage,
+          #prevPage,
+          #prevRange,
+          #nextRange {
+            margin: 2vw;
+            font-size: 1rem;
+            border-radius: 10px;
+          }
+          
+          .batch-popup-trigger {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #2d2664;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+          }
+          
+          .batch-popup-trigger:hover {
+            background-color: #655da2;
+            transform: scale(1.1);
+          }
+          
+          .batch-popup {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+          }
+          
+          .batch-popup.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+          }
+          
+          .batch-popup h3 {
+            margin-top: 0;
+          }
+          
+          .batch-popup .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+          
+          .batch-popup button,
+          .batch-popup input[type="file"] {
+            width: 100%;
+          }
+          
+          @media (max-width: 768px) {
+            .app-container {
+              flex-direction: column;
+              height: auto;
+            }
+          
+            .form-container {
+              width: 100%;
+              max-width: 100%;
+              margin-bottom: 20px;
+            }
+          
+            .content-container {
+              height: auto;
+              margin-left: 0;
+              margin-right: 0;
+            }
+          
+            .calendar-controls {
+              flex-direction: column;
+              align-items: stretch;
+            }
+          
+            #prevWeek,
+            #nextWeek {
+              max-width: 100%;
+            }
+          
+            #nextPage,
+            #prevPage {
+              margin: 1vw;
+              font-size: 0.9rem;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            #nextPage,
+            #prevPage {
+              margin: 0.5vw;
+              font-size: 0.8rem;
+            }
+          }
+          .batch-popup-trigger {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #2d2664;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+          }
+          
+          .batch-popup-trigger:hover {
+            background-color: #655da2;
+            transform: scale(1.1);
+          }
+          
+          .batch-popup {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+          }
+          
+          .batch-popup.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+          }
+          
+          .batch-popup h3 {
+            margin-top: 0;
+          }
+          
+          .batch-popup .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+          
+          .batch-popup button,
+          .batch-popup input[type="file"] {
+            width: 100%;
+          }
+    </style>
   </head>
   <body>
     <div class="app-container">
@@ -60,7 +591,7 @@
           </div>
         </div>
 
-        <div class="control-section">          
+        <div class="control-section">
           <div>
             <label for="toggleFreeDays">
               <input type="checkbox" id="toggleFreeDays" />
@@ -70,19 +601,28 @@
         </div>
 
         <!-- Dynamic Select TO replace -->
-          <div class="button-group">
-            <button id="selectAll" type="button" class="tooltip" style="display: none">
-              Select All
-              <span class="tooltiptext">Select all visible events</span>
-            </button>
-            <button id="selectBetween" type="button" class="tooltip" style="display: none">
-              Select Between
-              <span class="tooltiptext"
-                >Select events between two selected events</span
-              >
-            </button>
-          </div>
-        
+        <div class="button-group">
+          <button
+            id="selectAll"
+            type="button"
+            class="tooltip"
+            style="display: none"
+          >
+            Select All
+            <span class="tooltiptext">Select all visible events</span>
+          </button>
+          <button
+            id="selectBetween"
+            type="button"
+            class="tooltip"
+            style="display: none"
+          >
+            Select Between
+            <span class="tooltiptext"
+              >Select events between two selected events</span
+            >
+          </button>
+        </div>
       </div>
 
       <div class="content-container">
@@ -110,9 +650,9 @@
                       class="tooltip"
                     />
                     <!-- <span class="tooltiptext"
-                      >Select all displayed events or range of selected
-                      events</span
-                    > -->
+                        >Select all displayed events or range of selected
+                        events</span
+                      > -->
                   </div>
                 </th>
                 <th>Date</th>
@@ -140,9 +680,32 @@
       </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
+      // Initialize Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyAFKQ-g5-ZivxHQ3y3KW9JoHVwTzNQmLB4",
+        authDomain: "simple-calendar-ultimega.firebaseapp.com",
+        databaseURL:
+          "https://simple-calendar-ultimega-default-rtdb.firebaseio.com",
+        projectId: "simple-calendar-ultimega",
+        storageBucket: "simple-calendar-ultimega.appspot.com",
+        messagingSenderId: "610639720462",
+        appId: "1:610639720462:web:cef59ff4d3479fc7090c5f",
+        measurementId: "G-RJWHRX0R13",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+      // Enable offline persistence
+      firebase.database().goOnline();
+
       document.addEventListener("DOMContentLoaded", (event) => {
-        //Variables
+        // Variables
         const form = document.getElementById("eventForm");
         const table = document.getElementById("eventTable");
         const tbody = table.getElementsByTagName("tbody")[0];
@@ -151,7 +714,6 @@
         const eventTimeField = document.getElementById("eventTime");
         const editIndexField = document.getElementById("editIndex");
         const filterSelect = document.getElementById("filterSelect");
-        const viewSelect = document.getElementById("viewSelect");
         const selectAllButton = document.getElementById("selectAll");
         const selectBetweenButton = document.getElementById("selectBetween");
         const searchInput = document.getElementById("searchInput");
@@ -164,18 +726,8 @@
         const prevPageButton = document.getElementById("prevPage");
         const nextPageButton = document.getElementById("nextPage");
         const pageInfoSpan = document.getElementById("pageInfo");
-        const rangeControls = document.getElementById("range-controls");
-        const prevRangeButton = document.getElementById("prevRange");
-        const nextRangeButton = document.getElementById("nextRange");
-        const currentRangeSpan = document.getElementById("currentRange");
         const toggleFreeDaysCheckbox =
           document.getElementById("toggleFreeDays");
-        const calendarContainer = document.querySelector(".calendar-container");
-        const tableContainer = document.querySelector(".table-container");
-
-        const currentWeekRangeSpan =
-          document.getElementById("currentWeekRange");
-        const calendarGrid = document.getElementById("calendarGrid");
         const selectAllCheckbox = document.getElementById("selectAllCheckbox");
 
         //FOR LOADING FREE WEEKS
@@ -198,8 +750,124 @@
         currentWeekStart.setDate(
           currentWeekStart.getDate() - currentWeekStart.getDay()
         );
-        let allEventsWithFreeDays = [];
-        let allEvents = JSON.parse(localStorage.getItem("events")) || [];
+
+        // Firebase reference
+        const eventsRef = db.ref("events");
+
+        // Load events from Firebase
+        function loadEventsFromFirebase() {
+          eventsRef.on("value", (snapshot) => {
+            allEvents = snapshot.val() || [];
+            loadEvents(filterSelect.value, null, currentPage);
+          });
+        }
+
+        // Update Firebase with local changes
+        function updateFirebase() {
+          eventsRef.set(allEvents);
+        }
+
+        function loadEvents(filter = "all", searchParams = null, page = 1) {
+          let filteredEvents = [...allEvents];
+
+          if (filter === "week") {
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+            filteredEvents = filteredEvents.filter((event) => {
+              const eventDate = new Date(event.date);
+              return eventDate >= startOfWeek && eventDate <= endOfWeek;
+            });
+
+            if (showFreeDays) {
+              for (
+                let d = new Date(startOfWeek);
+                d <= endOfWeek;
+                d.setDate(d.getDate() + 1)
+              ) {
+                const currentDate = new Date(d);
+                const existingEvent = filteredEvents.find(
+                  (event) =>
+                    new Date(event.date).toDateString() ===
+                    currentDate.toDateString()
+                );
+
+                if (!existingEvent) {
+                  filteredEvents.push({
+                    name: "Free",
+                    date: currentDate.toISOString().split("T")[0],
+                    time: "--:--",
+                  });
+                }
+              }
+            }
+          }
+
+          if (searchParams) {
+            const { searchTerm, start, end } = searchParams;
+            filteredEvents = filteredEvents.filter((event) => {
+              const eventDate = new Date(event.date);
+              const matchesTerm = searchTerm
+                ? event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  event.date.includes(searchTerm) ||
+                  event.time.includes(searchTerm) ||
+                  eventDate
+                    .toLocaleString("default", { month: "long" })
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+                : true;
+              const matchesDateRange =
+                (!start || event.date >= start) && (!end || event.date <= end);
+              return matchesTerm && matchesDateRange;
+            });
+          }
+
+          const startIndex = (page - 1) * eventsPerPage;
+          const endIndex = startIndex + eventsPerPage;
+          const paginatedEvents = filteredEvents.slice(startIndex, endIndex);
+
+          renderEvents(paginatedEvents, startIndex);
+          updatePagination(filteredEvents.length, page);
+          sortTable(currentSortColumn, currentSortDirection);
+          updateDeleteButtonState();
+
+          noEventsFoundMessage.style.display =
+            filteredEvents.length === 0 ? "block" : "none";
+        }
+
+        function renderEvents(events, startIndex) {
+          tbody.innerHTML = "";
+          events.forEach((event, index) => {
+            const row = tbody.insertRow();
+            const globalIndex = startIndex + index;
+            const isFreeDay = event.name === "Free";
+
+            row.innerHTML = `
+              <td><input type="checkbox" ${
+                selectedEvents.has(globalIndex) ? "checked" : ""
+              } ${isFreeDay ? "disabled" : ""} /></td>
+              <td>${formatDate(event.date)}</td>
+              <td>${event.time}</td>
+              <td>${event.name}</td>
+            `;
+
+            if (selectedEvents.has(globalIndex)) row.classList.add("selected");
+            if (globalIndex === lastSelectedIndex)
+              row.classList.add("last-selected");
+            if (isFreeDay) row.classList.add("free-day");
+
+            if (!isFreeDay) {
+              row
+                .querySelector('input[type="checkbox"]')
+                .addEventListener("change", function () {
+                  toggleEventSelection(this, globalIndex);
+                });
+            }
+          });
+        }
 
         function formatDate(date, includeYear = true) {
           const options = {
@@ -229,125 +897,6 @@
             default:
               return "th";
           }
-        }
-
-        function loadEvents(filter = "all", searchParams = null, page = 1) {
-          console.log(
-            "Loading events. Filter:",
-            filter,
-            "Show free days:",
-            showFreeDays,
-            "Page:",
-            page
-          );
-
-          // const events = allEvents;
-          let filteredEvents = [];
-
-          const today = new Date();
-          const startOfWeek = new Date(today);
-          startOfWeek.setDate(today.getDate() - today.getDay());
-          const endOfWeek = new Date(startOfWeek);
-          endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-          console.log(
-            "Week range:",
-            startOfWeek.toDateString(),
-            "to",
-            endOfWeek.toDateString()
-          );
-
-          if (filter === "week") {
-            for (
-              let d = new Date(startOfWeek);
-              d <= endOfWeek;
-              d.setDate(d.getDate() + 1)
-            ) {
-              const currentDate = new Date(d);
-              const existingEvent = events.find(
-                (event) =>
-                  new Date(event.date).toDateString() ===
-                  currentDate.toDateString()
-              );
-
-              if (existingEvent) {
-                filteredEvents.push(existingEvent);
-              } else if (showFreeDays) {
-                filteredEvents.push({
-                  name: "Free",
-                  date: currentDate.toISOString().split("T")[0],
-                  time: "--:--",
-                });
-              }
-            }
-          } else {
-            filteredEvents = allEvents;
-          }
-
-          if (searchParams) {
-            const { searchTerm, start, end } = searchParams;
-            filteredEvents = filteredEvents.filter((event) => {
-              const eventDate = new Date(event.date);
-              const matchesTerm = searchTerm
-                ? event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  event.date.includes(searchTerm) ||
-                  event.time.includes(searchTerm) ||
-                  eventDate
-                    .toLocaleString("default", { month: "long" })
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
-                : true;
-              const matchesDateRange =
-                (!start || event.date >= start) && (!end || event.date <= end);
-              return matchesTerm && matchesDateRange;
-            });
-          }
-
-          console.log("Filtered events:", filteredEvents);
-
-          const startIndex = (page - 1) * eventsPerPage;
-          const endIndex = startIndex + eventsPerPage;
-          const paginatedEvents = filteredEvents.slice(startIndex, endIndex);
-
-          console.log("Paginated events:", paginatedEvents);
-
-          tbody.innerHTML = "";
-          paginatedEvents.forEach((event, index) => {
-            const row = tbody.insertRow();
-            const globalIndex = startIndex + index;
-            const isFreeDay = event.name === "Free";
-
-            row.innerHTML = `
-              <td><input type="checkbox" ${
-                selectedEvents.has(globalIndex) ? "checked" : ""
-              } ${isFreeDay ? "disabled" : ""} /></td>
-              <td>${formatDate(event.date)}</td>
-              <td>${event.time}</td>
-              <td>${event.name}</td>
-            `;
-
-            if (selectedEvents.has(globalIndex)) row.classList.add("selected");
-            if (globalIndex === lastSelectedIndex)
-              row.classList.add("last-selected");
-            if (isFreeDay) row.classList.add("free-day");
-
-            if (!isFreeDay) {
-              row
-                .querySelector('input[type="checkbox"]')
-                .addEventListener("change", function () {
-                  toggleEventSelection(this, globalIndex);
-                });
-            }
-          });
-
-          console.log("Table rows:", tbody.innerHTML);
-
-          updatePagination(filteredEvents.length, page);
-          sortTable(currentSortColumn, currentSortDirection);
-          updateDeleteButtonState();
-
-          noEventsFoundMessage.style.display =
-            filteredEvents.length === 0 ? "block" : "none";
         }
 
         function loadWeeksWithFreeDays(page = 1) {
@@ -395,37 +944,6 @@
           updatePagination(allEventsWithFreeDays.length, page);
           sortTable(currentSortColumn, currentSortDirection);
           updateDeleteButtonState();
-        }
-
-        function renderEvents(events, startIndex) {
-          tbody.innerHTML = "";
-          events.forEach((event, index) => {
-            const row = tbody.insertRow();
-            const globalIndex = startIndex + index;
-            const isFreeDay = event.name === "Free";
-
-            row.innerHTML = `
-              <td><input type="checkbox" ${
-                selectedEvents.has(globalIndex) ? "checked" : ""
-              } ${isFreeDay ? "disabled" : ""} /></td>
-              <td>${formatDate(event.date)}</td>
-              <td>${event.time}</td>
-              <td>${event.name}</td>
-            `;
-
-            if (selectedEvents.has(globalIndex)) row.classList.add("selected");
-            if (globalIndex === lastSelectedIndex)
-              row.classList.add("last-selected");
-            if (isFreeDay) row.classList.add("free-day");
-
-            if (!isFreeDay) {
-              row
-                .querySelector('input[type="checkbox"]')
-                .addEventListener("change", function () {
-                  toggleEventSelection(this, globalIndex);
-                });
-            }
-          });
         }
 
         function updatePagination(totalEvents, currentPage) {
@@ -574,9 +1092,7 @@
             };
           }
 
-          localStorage.setItem("events", JSON.stringify(allEvents)); //New Global allEvents variable
-          console.log("Current Events:", JSON.stringify(allEvents));
-
+          updateFirebase();
           loadEvents(filterSelect.value, null, currentPage);
 
           form.reset();
@@ -612,7 +1128,33 @@
           loadEvents(filterSelect.value, null, 1);
         });
 
-        // Event listeners for pagination buttons
+        document
+          .getElementById("deleteSelected")
+          .addEventListener("click", function () {
+            if (selectedEvents.size > 0) {
+              allEvents = allEvents.filter(
+                (_, index) => !selectedEvents.has(index)
+              );
+              updateFirebase();
+              loadEvents(filterSelect.value, null, 1);
+
+              selectedEvents.clear();
+              lastSelectedIndex = null;
+              form.reset();
+              editIndexField.value = "";
+              const now = new Date();
+              eventDateField.value = now.toISOString().split("T")[0];
+              eventTimeField.value = now
+                .toTimeString()
+                .split(" ")[0]
+                .slice(0, 5);
+              eventNameField.focus();
+              updateDeleteButtonState();
+            } else {
+              alert("Please select at least one event to delete.");
+            }
+          });
+
         prevPageButton.addEventListener("click", function () {
           if (currentPage > 1) {
             currentPage--;
@@ -725,33 +1267,6 @@
           updateDeleteButtonState();
         });
 
-        document
-          .getElementById("deleteSelected")
-          .addEventListener("click", function () {
-            if (selectedEvents.size > 0) {
-              allEvents = allEvents.filter(
-                (_, index) => !selectedEvents.has(index)
-              );
-              localStorage.setItem("events", JSON.stringify(allEvents));
-              loadEvents(filterSelect.value, null, 1);
-
-              selectedEvents.clear();
-              lastSelectedIndex = null;
-              form.reset();
-              editIndexField.value = "";
-              const now = new Date();
-              eventDateField.value = now.toISOString().split("T")[0];
-              eventTimeField.value = now
-                .toTimeString()
-                .split(" ")[0]
-                .slice(0, 5);
-              eventNameField.focus();
-              updateDeleteButtonState();
-            } else {
-              alert("Please select at least one event to delete.");
-            }
-          });
-
         toggleFreeDaysCheckbox.addEventListener("change", function () {
           showFreeDays = this.checked;
           currentPage = 1; // Reset to first page when toggling
@@ -779,8 +1294,8 @@
         const now = new Date();
         eventDateField.value = now.toISOString().split("T")[0];
         eventTimeField.value = now.toTimeString().split(" ")[0].slice(0, 5);
-        loadEvents();
-        tableContainer.style.display = "block";
+        loadEventsFromFirebase();
+        document.querySelector(".table-container").style.display = "block";
         document.getElementById("eventName").focus();
       });
     </script>
